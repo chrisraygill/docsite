@@ -1769,19 +1769,14 @@ import 'package:genkit_google_genai/genkit_google_genai.dart';
 
 final ai = Genkit(plugins: [googleAI()]);
 
-// Dummy retriever that always returns the same facts
-final dummyRetriever = ai.defineRetriever(
-  name: 'dummyRetriever',
-  fn: (query, context) async {
-    final facts = [
-      "Dog is man's best friend",
-      'Dogs have evolved and were domesticated from wolves',
-    ];
-    return RetrieverResponse(
-      documents: facts.map((t) => Document.fromText(t)).toList(),
-    );
-  },
-);
+// Dummy retriever function that always returns the same facts
+Future<List<DocumentData>> dummyRetrieve(String query) async {
+  final facts = [
+    "Dog is man's best friend",
+    'Dogs have evolved and were domesticated from wolves',
+  ];
+  return facts.map((t) => DocumentData(content: [TextPart(text: t)])).toList();
+}
 
 // A simple question-answering flow
 final qaFlow = ai.defineFlow(
@@ -1789,15 +1784,11 @@ final qaFlow = ai.defineFlow(
   inputSchema: .string(),
   outputSchema: .string(),
   fn: (query, context) async {
-    final factDocs = await ai.retrieve(
-      retriever: dummyRetriever,
-      query: query,
-    );
+    final factDocs = await dummyRetrieve(query as String);
 
     final response = await ai.generate(
       model: googleAI.gemini('gemini-2.5-flash'),
-      prompt: 'Answer this question with the given context: $query',
-      docs: factDocs.documents,
+      prompt: 'Answer this question with the given context: $query\nContext: ${factDocs.map((d) => d.content.first.text).join('\n')}',
     );
     return response.text ?? '';
   },
