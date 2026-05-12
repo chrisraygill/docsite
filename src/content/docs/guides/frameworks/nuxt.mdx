@@ -1,13 +1,77 @@
 ---
 title: Nuxt
-description: Start from a Nuxt app and expose the same recipe flow from the main quickstart using Nitro server routes and the Genkit fetch handler.
+description: Add Genkit AI features to a Nuxt app — either with built-in server routes or by connecting to a standalone Genkit backend in any language.
 supportedLanguages:
   - js
+  - go
+  - dart
+  - python
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
+import Lang from '../../../../components/Lang.astro';
 
-Use this guide when you're starting from a Nuxt app and want to add Genkit flows as server API endpoints alongside your Vue frontend.
+Use this guide when you're starting from a Nuxt app and want to add Genkit flows as server API endpoints alongside your Vue frontend. You can either define Genkit flows directly in Nuxt server routes, or connect your Nuxt frontend to a standalone Genkit backend written in any language.
+
+<Lang lang="go dart python">
+
+## Connect to a standalone backend
+
+Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
+
+1. **Set up your backend** — follow a [server integration guide](/guides/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
+2. **Call flows from Nuxt** — use `runFlow` from the Genkit client library in your Vue components, pointing to your backend's URL.
+
+### Install the client library
+
+```bash
+npm install genkit
+```
+
+### Call a flow
+
+```vue title="app.vue"
+<script setup lang="ts">
+import { ref } from 'vue';
+import { runFlow } from 'genkit/beta/client';
+
+const ingredient = ref('avocado');
+const dietaryRestrictions = ref('vegetarian');
+const recipe = ref<any>(null);
+
+async function generateRecipe() {
+  recipe.value = await runFlow({
+    url: 'http://localhost:3000/recipeGeneratorFlow',
+    input: {
+      ingredient: ingredient.value,
+      dietaryRestrictions: dietaryRestrictions.value,
+    },
+  });
+}
+</script>
+
+<template>
+  <main>
+    <h1>Recipe generator</h1>
+    <label>
+      Ingredient
+      <input v-model="ingredient" />
+    </label>
+    <label>
+      Dietary restrictions
+      <input v-model="dietaryRestrictions" />
+    </label>
+    <button @click="generateRecipe">Generate recipe</button>
+    <pre v-if="recipe">{{ JSON.stringify(recipe, null, 2) }}</pre>
+  </main>
+</template>
+```
+
+Replace `http://localhost:3000` with your backend's address. See the [Web client](/guides/frontend/web-client) guide for streaming and advanced patterns.
+
+</Lang>
+
+<Lang lang="js">
 
 ## Before you begin
 
@@ -15,6 +79,10 @@ Use this guide when you're starting from a Nuxt app and want to add Genkit flows
 - npm
 
 This guide assumes you're already familiar with building Nuxt applications.
+
+:::tip[Using a standalone backend?]
+If your Genkit backend runs as a separate server — in any language — you don't need the server-side setup below. Switch your language selection to see the standalone backend path, or see the [Web client](/guides/frontend/web-client) guide.
+:::
 
 ## Create a project
 
@@ -284,9 +352,12 @@ In the Developer UI:
      with input parameters and the resulting structured output.
    </video>
 
+</Lang>
+
 ## Next steps
 
 - [Creating flows](/docs/flows)
 - [Generating content](/docs/models)
-- [Accessing flows from the client](/docs/client)
+- [Connect a web frontend](/guides/frontend/web-client)
+- [Connect a Flutter app](/guides/frontend/flutter)
 - [Developer tools](/docs/devtools)

@@ -223,7 +223,7 @@ const GUIDES_SIDEBAR = [
     ],
   },
   {
-    label: "Full-stack",
+    label: "App integration",
     items: [
       { label: "Next.js App Router", slug: "guides/frameworks/nextjs-app-router" },
       { label: "Next.js Pages Router", slug: "guides/frameworks/nextjs-pages" },
@@ -232,11 +232,14 @@ const GUIDES_SIDEBAR = [
       { label: "TanStack Start", slug: "guides/frameworks/tanstack-start" },
       { label: "Astro", slug: "guides/frameworks/astro" },
       { label: "Angular", slug: "guides/frameworks/angular" },
+      { label: "Web client", slug: "guides/frontend/web-client" },
+      { label: "Flutter", slug: "guides/frontend/flutter" },
     ],
   },
   {
-    label: "Server",
+    label: "Server integration",
     items: [
+      { label: "Overview", slug: "guides/frameworks/overview" },
       { label: "Express", slug: "guides/frameworks/express" },
       { label: "Hono", slug: "guides/frameworks/hono" },
       { label: "Fastify", slug: "guides/frameworks/fastify" },
@@ -247,13 +250,6 @@ const GUIDES_SIDEBAR = [
       { label: "Echo", slug: "guides/frameworks/echo" },
       { label: "Chi", slug: "guides/frameworks/chi" },
       { label: "Shelf", slug: "guides/frameworks/shelf" },
-    ],
-  },
-  {
-    label: "Frontend",
-    items: [
-      { label: "Web client", slug: "guides/frontend/web-client" },
-      { label: "Flutter", slug: "guides/frontend/flutter" },
     ],
   },
   {

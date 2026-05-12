@@ -1,13 +1,73 @@
 ---
 title: SvelteKit
-description: Start from a SvelteKit app and expose the same recipe flow from the main quickstart using API routes and the Genkit fetch handler.
+description: Add Genkit AI features to a SvelteKit app — either with built-in API routes or by connecting to a standalone Genkit backend in any language.
 supportedLanguages:
   - js
+  - go
+  - dart
+  - python
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
+import Lang from '../../../../components/Lang.astro';
 
-Use this guide when you're starting from a SvelteKit app and want the fastest path to a working Genkit integration with server-side API routes and a Svelte frontend.
+Use this guide to add Genkit to a SvelteKit app. You can either define Genkit flows directly in SvelteKit API routes, or connect your SvelteKit frontend to a standalone Genkit backend written in any language.
+
+<Lang lang="go dart python">
+
+## Connect to a standalone backend
+
+Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
+
+1. **Set up your backend** — follow a [server integration guide](/guides/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
+2. **Call flows from SvelteKit** — use `runFlow` from the Genkit client library in your Svelte components, pointing to your backend's URL.
+
+### Install the client library
+
+```bash
+npm install genkit
+```
+
+### Call a flow
+
+```svelte title="src/routes/+page.svelte"
+<script lang="ts">
+  import { runFlow } from 'genkit/beta/client';
+
+  let ingredient = 'avocado';
+  let dietaryRestrictions = 'vegetarian';
+  let recipe: any = null;
+
+  async function generateRecipe() {
+    recipe = await runFlow({
+      url: 'http://localhost:3000/recipeGeneratorFlow',
+      input: { ingredient, dietaryRestrictions },
+    });
+  }
+</script>
+
+<main>
+  <h1>Recipe generator</h1>
+  <label>
+    Ingredient
+    <input bind:value={ingredient} />
+  </label>
+  <label>
+    Dietary restrictions
+    <input bind:value={dietaryRestrictions} />
+  </label>
+  <button on:click={generateRecipe}>Generate recipe</button>
+  {#if recipe}
+    <pre>{JSON.stringify(recipe, null, 2)}</pre>
+  {/if}
+</main>
+```
+
+Replace `http://localhost:3000` with your backend's address. See the [Web client](/guides/frontend/web-client) guide for streaming and advanced patterns.
+
+</Lang>
+
+<Lang lang="js">
 
 ## Before you begin
 
@@ -15,6 +75,10 @@ Use this guide when you're starting from a SvelteKit app and want the fastest pa
 - npm
 
 This guide assumes you're already familiar with building SvelteKit applications.
+
+:::tip[Using a standalone backend?]
+If your Genkit backend runs as a separate server — in any language — you don't need the server-side setup below. Switch your language selection to see the standalone backend path, or see the [Web client](/guides/frontend/web-client) guide.
+:::
 
 ## Create a project
 
@@ -261,9 +325,12 @@ In the Developer UI:
      with input parameters and the resulting structured output.
    </video>
 
+</Lang>
+
 ## Next steps
 
 - [Creating flows](/docs/flows)
 - [Generating content](/docs/models)
-- [Accessing flows from the client](/docs/client)
+- [Connect a web frontend](/guides/frontend/web-client)
+- [Connect a Flutter app](/guides/frontend/flutter)
 - [Developer tools](/docs/devtools)
