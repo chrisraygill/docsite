@@ -13,6 +13,36 @@ import Lang from '../../../../components/Lang.astro';
 
 Use this guide when you're starting from an Angular app and want a practical Genkit setup with a server route and frontend call. You can either define Genkit flows directly in Angular SSR server routes, or connect your Angular frontend to a standalone Genkit backend written in any language.
 
+## Before you begin
+
+- Node.js v20 or later
+- npm
+- Angular CLI
+
+This guide assumes you're already familiar with building Angular applications.
+
+## Create a project
+
+<Lang lang="js">
+
+This path uses Angular with SSR and server routing so Genkit can run server-side:
+
+```bash
+ng new --ssr --server-routing
+```
+
+</Lang>
+
+<Lang lang="go dart python">
+
+Create a standard Angular project:
+
+```bash
+ng new
+```
+
+</Lang>
+
 <Lang lang="go dart python">
 
 ## Connect to a standalone backend
@@ -85,26 +115,6 @@ Replace `http://localhost:3000` with your backend's address. See the [Web client
 </Lang>
 
 <Lang lang="js">
-
-## Before you begin
-
-- Node.js v20 or later
-- npm
-- Angular CLI
-
-This guide assumes you're already familiar with building Angular applications.
-
-:::tip[Using a standalone backend?]
-If your Genkit backend runs as a separate server — in any language — you don't need the server-side setup below. Switch your language selection to see the standalone backend path, or see the [Web client](/guides/frontend/web-client) guide.
-:::
-
-## Create a project
-
-This guide uses Angular with SSR and server routing:
-
-```bash
-ng new --ssr --server-routing
-```
 
 ## Project layout
 

@@ -13,6 +13,24 @@ import Lang from '../../../../components/Lang.astro';
 
 Use this guide to add Genkit to a SvelteKit app. You can either define Genkit flows directly in SvelteKit API routes, or connect your SvelteKit frontend to a standalone Genkit backend written in any language.
 
+## Before you begin
+
+- Node.js v20 or later
+- npm
+
+This guide assumes you're already familiar with building SvelteKit applications.
+
+## Create a project
+
+If you don't already have a SvelteKit project, create one:
+
+```bash
+npx sv create my-genkit-sveltekit
+cd my-genkit-sveltekit
+```
+
+When prompted, select the **Minimal** template and enable TypeScript.
+
 <Lang lang="go dart python">
 
 ## Connect to a standalone backend
@@ -68,28 +86,6 @@ Replace `http://localhost:3000` with your backend's address. See the [Web client
 </Lang>
 
 <Lang lang="js">
-
-## Before you begin
-
-- Node.js v20 or later
-- npm
-
-This guide assumes you're already familiar with building SvelteKit applications.
-
-:::tip[Using a standalone backend?]
-If your Genkit backend runs as a separate server — in any language — you don't need the server-side setup below. Switch your language selection to see the standalone backend path, or see the [Web client](/guides/frontend/web-client) guide.
-:::
-
-## Create a project
-
-If you don't already have a SvelteKit project, create one:
-
-```bash
-npx sv create my-genkit-sveltekit
-cd my-genkit-sveltekit
-```
-
-When prompted, select the **Minimal** template and enable TypeScript.
 
 ## Project layout
 

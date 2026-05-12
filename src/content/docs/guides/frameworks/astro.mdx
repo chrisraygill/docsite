@@ -13,6 +13,24 @@ import Lang from '../../../../components/Lang.astro';
 
 Use this guide when you're starting from an Astro app with server-side rendering (SSR) and want to add Genkit flows as API endpoints alongside your Astro pages. You can either define Genkit flows directly in Astro API routes, or connect your Astro frontend to a standalone Genkit backend written in any language.
 
+## Before you begin
+
+- Node.js v20 or later
+- npm
+
+This guide assumes you're already familiar with building Astro applications.
+
+## Create a project
+
+If you don't already have an Astro project, create one:
+
+```bash
+npm create astro@latest my-genkit-astro
+cd my-genkit-astro
+```
+
+When prompted, select the **Empty** template and enable TypeScript.
+
 <Lang lang="go dart python">
 
 ## Connect to a standalone backend
@@ -77,28 +95,6 @@ Replace `http://localhost:3000` with your backend's address. See the [Web client
 </Lang>
 
 <Lang lang="js">
-
-## Before you begin
-
-- Node.js v20 or later
-- npm
-
-This guide assumes you're already familiar with building Astro applications.
-
-:::tip[Using a standalone backend?]
-If your Genkit backend runs as a separate server — in any language — you don't need the SSR setup below. Switch your language selection to see the standalone backend path, or see the [Web client](/guides/frontend/web-client) guide.
-:::
-
-## Create a project
-
-If you don't already have an Astro project, create one:
-
-```bash
-npm create astro@latest my-genkit-astro
-cd my-genkit-astro
-```
-
-When prompted, select the **Empty** template and enable TypeScript.
 
 ### Enable SSR
 

@@ -13,6 +13,21 @@ import Lang from '../../../../components/Lang.astro';
 
 Use this guide when you're starting from a Next.js App Router app and want the fastest path to a working Genkit integration. You can either define Genkit flows directly in Next.js route handlers, or connect your Next.js frontend to a standalone Genkit backend written in any language.
 
+## Before you begin
+
+- Node.js v20 or later
+- npm
+
+This guide assumes you're already familiar with building Next.js applications.
+
+## Create a project
+
+If you don't already have a Next.js project, create one:
+
+```bash
+npx create-next-app@latest --src-dir
+```
+
 <Lang lang="go dart python">
 
 ## Connect to a standalone backend
@@ -70,25 +85,6 @@ Replace `http://localhost:3000` with your backend's address. See the [Web client
 </Lang>
 
 <Lang lang="js">
-
-## Before you begin
-
-- Node.js v20 or later
-- npm
-
-This guide assumes you're already familiar with building Next.js applications.
-
-:::tip[Using a standalone backend?]
-If your Genkit backend runs as a separate server — in any language — you don't need the route handler setup below. Switch your language selection to see the standalone backend path, or see the [Web client](/guides/frontend/web-client) guide.
-:::
-
-## Create a project
-
-If you don't already have a Next.js project, create one:
-
-```bash
-npx create-next-app@latest --src-dir
-```
 
 ## Project layout
 
