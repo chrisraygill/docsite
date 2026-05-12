@@ -229,6 +229,7 @@ const GUIDES_SIDEBAR = [
       { label: "Next.js Pages Router", slug: "guides/frameworks/nextjs-pages" },
       { label: "SvelteKit", slug: "guides/frameworks/sveltekit" },
       { label: "Nuxt", slug: "guides/frameworks/nuxt" },
+      { label: "TanStack Start", slug: "guides/frameworks/tanstack-start" },
       { label: "Astro", slug: "guides/frameworks/astro" },
       { label: "Angular", slug: "guides/frameworks/angular" },
     ],

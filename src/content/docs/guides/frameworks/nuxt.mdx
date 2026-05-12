@@ -53,7 +53,7 @@ npm install -g genkit-cli
 Then install the packages you need in your project:
 
 ```bash
-npm install genkit @genkit-ai/google-genai
+npm install genkit @genkit-ai/google-genai @genkit-ai/fetch
 npm install -D tsx
 ```
 
@@ -127,7 +127,7 @@ Create `server/api/recipeGeneratorFlow/[...path].post.ts` to expose the flow usi
 
 ```ts title="server/api/recipeGeneratorFlow/[...path].post.ts"
 import { recipeGeneratorFlow } from '~/lib/genkit/recipeGeneratorFlow';
-import { fetchHandlers } from 'genkit/beta/fetch';
+import { fetchHandlers } from '@genkit-ai/fetch';
 
 const handleFlow = fetchHandlers(
   [recipeGeneratorFlow],

@@ -1,47 +1,45 @@
 ---
-title: SvelteKit
-description: Start from a SvelteKit app and expose the same recipe flow from the main quickstart using API routes and the Genkit fetch handler.
+title: TanStack Start
+description: Start from a TanStack Start app and expose the same recipe flow from the main quickstart using API routes and the Genkit fetch handler.
 supportedLanguages:
   - js
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
 
-Use this guide when you're starting from a SvelteKit app and want the fastest path to a working Genkit integration with server-side API routes and a Svelte frontend.
+Use this guide when you're starting from a TanStack Start app and want to add Genkit flows as API endpoints alongside your TanStack Router pages.
 
 ## Before you begin
 
 - Node.js v20 or later
 - npm
 
-This guide assumes you're already familiar with building SvelteKit applications.
+This guide assumes you're already familiar with building TanStack Start applications.
 
 ## Create a project
 
-If you don't already have a SvelteKit project, create one:
+If you don't already have a TanStack Start project, create one:
 
 ```bash
-npx sv create my-genkit-sveltekit
-cd my-genkit-sveltekit
+npx create-start@latest my-genkit-tanstack
+cd my-genkit-tanstack
+npm install
 ```
-
-When prompted, select the **Minimal** template and enable TypeScript.
 
 ## Project layout
 
 <FileTree>
 
 - package.json
-- svelte.config.js
-- src
+- app.config.ts
+- app
   - routes
     - api
       - recipeGeneratorFlow
-        - **\[...path\]/+server.ts**
-    - **+page.svelte**
-  - lib
-    - genkit
-      - **recipeGeneratorFlow.ts**
+        - **\[...path\].ts**
+    - **index.tsx**
+  - genkit
+    - **recipeGeneratorFlow.ts**
 
 </FileTree>
 
@@ -70,9 +68,9 @@ export GEMINI_API_KEY=<your API key>
 
 ## Define your recipe flow
 
-Create `src/lib/genkit/recipeGeneratorFlow.ts`:
+Create `app/genkit/recipeGeneratorFlow.ts`:
 
-```ts title="src/lib/genkit/recipeGeneratorFlow.ts"
+```ts title="app/genkit/recipeGeneratorFlow.ts"
 import { googleAI } from '@genkit-ai/google-genai';
 import { genkit, z } from 'genkit';
 
@@ -126,11 +124,11 @@ export const recipeGeneratorFlow = ai.defineFlow(
 
 ## Create an API route
 
-Create `src/routes/api/recipeGeneratorFlow/[...path]/+server.ts` to expose the flow using Genkit's fetch handler:
+Create `app/routes/api/recipeGeneratorFlow/[...path].ts` to expose the flow using Genkit's fetch handler:
 
-```ts title="src/routes/api/recipeGeneratorFlow/[...path]/+server.ts"
-import type { RequestHandler } from './$types';
-import { recipeGeneratorFlow } from '$lib/genkit/recipeGeneratorFlow';
+```ts title="app/routes/api/recipeGeneratorFlow/[...path].ts"
+import { createAPIFileRoute } from '@tanstack/react-start/api';
+import { recipeGeneratorFlow } from '~/genkit/recipeGeneratorFlow';
 import { fetchHandlers } from '@genkit-ai/fetch';
 
 const handleFlow = fetchHandlers(
@@ -138,48 +136,57 @@ const handleFlow = fetchHandlers(
   '/api/recipeGeneratorFlow',
 );
 
-export const POST: RequestHandler = async ({ request }) => {
-  return handleFlow(request);
-};
+export const APIRoute = createAPIFileRoute(
+  '/api/recipeGeneratorFlow/$',
+)({
+  POST: async ({ request }) => {
+    return handleFlow(request);
+  },
+});
 ```
 
-SvelteKit API routes receive a standard Web `Request` object, so `fetchHandlers` works directly without any adapter.
+TanStack Start API routes receive a standard Web `Request` object, so `fetchHandlers` works directly without any adapter.
 
 ## Call your flow from the frontend
 
-Update `src/routes/+page.svelte`:
+Update `app/routes/index.tsx`:
 
-```svelte title="src/routes/+page.svelte"
-<script lang="ts">
-  import { runFlow } from 'genkit/beta/client';
+```tsx title="app/routes/index.tsx"
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+import { runFlow } from 'genkit/beta/client';
 
-  let ingredient = 'avocado';
-  let dietaryRestrictions = 'vegetarian';
-  let recipe: any = null;
+export const Route = createFileRoute('/')({
+  component: Home,
+});
+
+function Home() {
+  const [ingredient, setIngredient] = useState('avocado');
+  const [dietaryRestrictions, setDietaryRestrictions] = useState('vegetarian');
+  const [recipe, setRecipe] = useState<any>(null);
 
   async function generateRecipe() {
-    recipe = await runFlow({
+    const result = await runFlow({
       url: '/api/recipeGeneratorFlow',
       input: { ingredient, dietaryRestrictions },
     });
-  }
-</script>
 
-<main>
-  <h1>Recipe generator</h1>
-  <label>
-    Ingredient
-    <input bind:value={ingredient} />
-  </label>
-  <label>
-    Dietary restrictions
-    <input bind:value={dietaryRestrictions} />
-  </label>
-  <button on:click={generateRecipe}>Generate recipe</button>
-  {#if recipe}
-    <pre>{JSON.stringify(recipe, null, 2)}</pre>
-  {/if}
-</main>
+    setRecipe(result);
+  }
+
+  return (
+    <main>
+      <h1>Recipe generator</h1>
+      <input value={ingredient} onChange={(e) => setIngredient(e.target.value)} />
+      <input
+        value={dietaryRestrictions}
+        onChange={(e) => setDietaryRestrictions(e.target.value)}
+      />
+      <button onClick={generateRecipe}>Generate recipe</button>
+      {recipe && <pre>{JSON.stringify(recipe, null, 2)}</pre>}
+    </main>
+  );
+}
 ```
 
 ## Run your application
@@ -193,7 +200,7 @@ npm run dev
 You can also launch the Developer UI alongside your flow code:
 
 ```bash
-genkit start -- npx tsx --watch src/lib/genkit/recipeGeneratorFlow.ts
+genkit start -- npx tsx --watch app/genkit/recipeGeneratorFlow.ts
 ```
 
 ## Test your flow
@@ -201,7 +208,7 @@ genkit start -- npx tsx --watch src/lib/genkit/recipeGeneratorFlow.ts
 With the server running, call your flow over HTTP:
 
 ```bash
-curl -X POST http://localhost:5173/api/recipeGeneratorFlow \
+curl -X POST http://localhost:3000/api/recipeGeneratorFlow \
   -H "Content-Type: application/json" \
   -d '{"data":{"ingredient":"avocado","dietaryRestrictions":"vegetarian"}}'
 ```
@@ -219,7 +226,7 @@ The Genkit CLI is required to run the Developer UI. If you followed the installa
 Run the following command from your project root:
 
 ```bash
-genkit start -- npx tsx --watch src/lib/genkit/recipeGeneratorFlow.ts
+genkit start -- npx tsx --watch app/genkit/recipeGeneratorFlow.ts
 ```
 
 This starts your app and launches the Developer UI at `http://localhost:4000` by default.
