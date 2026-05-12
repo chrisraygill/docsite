@@ -88,8 +88,10 @@ class UnifiedPageManager {
 
   redirectNeutralDocsPathToCanonicalLanguage() {
     const normalizedPath = window.location.pathname.replace(/\/$/, '') || '/';
-    if (!normalizedPath.startsWith('/docs/')) return false;
-    if (/^\/docs\/(js|go|dart|python)(\/|$)/.test(normalizedPath)) return false;
+    const sectionMatch = normalizedPath.match(/^\/(docs|guides)\//);
+    if (!sectionMatch) return false;
+    const section = sectionMatch[1];
+    if (new RegExp(`^\\/${section}\\/(js|go|dart|python)(\\/|$)`).test(normalizedPath)) return false;
 
     const supported = DOC_LANGUAGE_SUPPORT[normalizedPath];
     if (!Array.isArray(supported) || supported.length === 0) return false;
@@ -98,8 +100,8 @@ class UnifiedPageManager {
     const canonicalLanguage = LANGUAGE_FALLBACK_ORDER.find((lang) => supported.includes(lang));
     if (!canonicalLanguage) return false;
 
-    const slug = normalizedPath.replace(/^\/docs\//, '');
-    const targetPath = `/docs/${canonicalLanguage}/${slug}/`;
+    const slug = normalizedPath.replace(new RegExp(`^\\/${section}\\/`), '');
+    const targetPath = `/${section}/${canonicalLanguage}/${slug}/`;
     const targetUrl = `${targetPath}${window.location.search}${window.location.hash}`;
     if (window.location.pathname === targetPath) return false;
 
@@ -111,16 +113,18 @@ class UnifiedPageManager {
     // Get language from URL or storage
     const params = new URLSearchParams(window.location.search);
     const urlLang = params.get('lang');
-    const pathLangMatch = window.location.pathname.match(/^\/docs\/(js|go|dart|python)(\/|$)/);
-    const pathLang = pathLangMatch ? pathLangMatch[1] : null;
+    const pathLangMatch = window.location.pathname.match(/^\/(docs|guides)\/(js|go|dart|python)(\/|$)/);
+    const pathLang = pathLangMatch ? pathLangMatch[2] : null;
+    const pathSection = pathLangMatch ? pathLangMatch[1] : null;
     const globalPreference = localStorage.getItem(this.storageKeys.globalPreference);
     const currentLanguage = localStorage.getItem(this.storageKeys.currentLanguage);
     const normalizedRequestedLang = urlLang ? this.normalizeLanguage(urlLang) : null;
-    const pathSlugMatch = window.location.pathname.match(/^\/docs\/(js|go|dart|python)\/(.+)$/);
+    const pathSlugMatch = window.location.pathname.match(/^\/(docs|guides)\/(js|go|dart|python)\/(.+)$/);
 
     if (pathLang && pathSlugMatch && normalizedRequestedLang) {
-      const slugPath = pathSlugMatch[2].replace(/\/$/, '');
-      const basePath = `/docs/${slugPath}`;
+      const section = pathSlugMatch[1];
+      const slugPath = pathSlugMatch[3].replace(/\/$/, '');
+      const basePath = `/${section}/${slugPath}`;
       const supported = DOC_LANGUAGE_SUPPORT[basePath];
       const isAgnostic = Boolean(DOC_LANGUAGE_AGNOSTIC[basePath]);
 
@@ -131,7 +135,7 @@ class UnifiedPageManager {
         normalizedRequestedLang !== pathLang
       ) {
         const nextUrl = new URL(window.location);
-        nextUrl.pathname = `/docs/${normalizedRequestedLang}/${slugPath}/`;
+        nextUrl.pathname = `/${section}/${normalizedRequestedLang}/${slugPath}/`;
         nextUrl.searchParams.delete('lang');
         window.location.replace(nextUrl.toString());
         return;
@@ -245,18 +249,19 @@ class UnifiedPageManager {
       localStorage.setItem(this.storageKeys.globalPreference, normalizedLang);
     }
 
-    // If currently on a language-specific docs URL, keep the same slug and switch language in path.
-    const pathMatch = window.location.pathname.match(/^\/docs\/(js|go|dart|python)\/(.+)$/);
+    // If currently on a language-specific docs or guides URL, keep the same slug and switch language in path.
+    const pathMatch = window.location.pathname.match(/^\/(docs|guides)\/(js|go|dart|python)\/(.+)$/);
     if (pathMatch) {
-      const slugPath = pathMatch[2].replace(/\/$/, '');
-      const basePath = `/docs/${slugPath}`;
+      const section = pathMatch[1];
+      const slugPath = pathMatch[3].replace(/\/$/, '');
+      const basePath = `/${section}/${slugPath}`;
       const supported = DOC_LANGUAGE_SUPPORT[basePath];
       const isAgnostic = DOC_LANGUAGE_AGNOSTIC[basePath];
       const targetPath = isAgnostic
         ? `${basePath}/`
         : Array.isArray(supported) && supported.includes(normalizedLang)
-          ? `/docs/${normalizedLang}/${slugPath}/`
-          : `/docs/${normalizedLang}/overview/`;
+          ? `/${section}/${normalizedLang}/${slugPath}/`
+          : `/${section === 'guides' ? 'guides' : 'docs'}/${normalizedLang}/overview/`;
       if (targetPath !== window.location.pathname) {
         window.location.assign(targetPath);
         return;
