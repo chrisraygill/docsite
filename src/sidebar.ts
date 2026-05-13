@@ -108,7 +108,7 @@ const DOCS_SIDEBAR = [
     ],
   },
   {
-    label: "Building AI workflows",
+    label: "Core concepts",
     items: [
       { label: "Creating flows", slug: "docs/flows" },
       { label: "Generating content", slug: "docs/models" },
@@ -141,13 +141,36 @@ const DOCS_SIDEBAR = [
     ],
   },
   {
-    label: "Tutorials",
+    label: "Backend frameworks",
     items: [
-      { label: "Chat with a PDF", slug: "docs/tutorials/chat-with-pdf" },
-      {
-        label: "Summarize YouTube videos",
-        slug: "docs/tutorials/summarize-youtube-videos",
-      },
+      { label: "Overview", slug: "docs/frameworks/overview" },
+      { label: "Chi", slug: "docs/frameworks/chi" },
+      { label: "Django", slug: "docs/frameworks/django" },
+      { label: "Echo", slug: "docs/frameworks/echo" },
+      { label: "Express.js", slug: "docs/frameworks/express" },
+      { label: "FastAPI", slug: "docs/frameworks/fastapi" },
+      { label: "Fastify", slug: "docs/frameworks/fastify" },
+      { label: "Flask", slug: "docs/frameworks/flask" },
+      { label: "Gin", slug: "docs/frameworks/gin" },
+      { label: "Hono", slug: "docs/frameworks/hono" },
+      { label: "NestJS", slug: "docs/frameworks/nestjs" },
+      { label: "Shelf", slug: "docs/frameworks/shelf" },
+    ],
+  },
+  {
+    label: "App frameworks",
+    items: [
+      { label: "Angular", slug: "docs/frameworks/angular" },
+      { label: "Astro", slug: "docs/frameworks/astro" },
+      { label: "Flutter", slug: "docs/frontend/flutter" },
+      { label: "Next.js App Router", slug: "docs/frameworks/nextjs-app-router" },
+      { label: "Next.js Pages Router", slug: "docs/frameworks/nextjs-pages" },
+      { label: "Nuxt", slug: "docs/frameworks/nuxt" },
+      { label: "React (Vite)", slug: "docs/frameworks/react" },
+      { label: "Remix", slug: "docs/frameworks/remix" },
+      { label: "SvelteKit", slug: "docs/frameworks/sveltekit" },
+      { label: "TanStack Start", slug: "docs/frameworks/tanstack-start" },
+      { label: "Web client", slug: "docs/frontend/web-client" },
     ],
   },
   {
@@ -199,39 +222,6 @@ const DOCS_SIDEBAR = [
     ],
   },
   {
-    label: "Backend frameworks",
-    items: [
-      { label: "Overview", slug: "docs/frameworks/overview" },
-      { label: "Chi", slug: "docs/frameworks/chi" },
-      { label: "Django", slug: "docs/frameworks/django" },
-      { label: "Echo", slug: "docs/frameworks/echo" },
-      { label: "Express.js", slug: "docs/frameworks/express" },
-      { label: "FastAPI", slug: "docs/frameworks/fastapi" },
-      { label: "Fastify", slug: "docs/frameworks/fastify" },
-      { label: "Flask", slug: "docs/frameworks/flask" },
-      { label: "Gin", slug: "docs/frameworks/gin" },
-      { label: "Hono", slug: "docs/frameworks/hono" },
-      { label: "NestJS", slug: "docs/frameworks/nestjs" },
-      { label: "Shelf", slug: "docs/frameworks/shelf" },
-    ],
-  },
-  {
-    label: "App frameworks",
-    items: [
-      { label: "Angular", slug: "docs/frameworks/angular" },
-      { label: "Astro", slug: "docs/frameworks/astro" },
-      { label: "Flutter", slug: "docs/frontend/flutter" },
-      { label: "Next.js App Router", slug: "docs/frameworks/nextjs-app-router" },
-      { label: "Next.js Pages Router", slug: "docs/frameworks/nextjs-pages" },
-      { label: "Nuxt", slug: "docs/frameworks/nuxt" },
-      { label: "React (Vite)", slug: "docs/frameworks/react" },
-      { label: "Remix", slug: "docs/frameworks/remix" },
-      { label: "SvelteKit", slug: "docs/frameworks/sveltekit" },
-      { label: "TanStack Start", slug: "docs/frameworks/tanstack-start" },
-      { label: "Web client", slug: "docs/frontend/web-client" },
-    ],
-  },
-  {
     label: "Deployment",
     items: [
       { label: "Firebase", slug: "docs/deployment/firebase" },
@@ -271,6 +261,16 @@ const DOCS_SIDEBAR = [
       },
       { label: "Troubleshooting", slug: "docs/observability/troubleshooting" },
       { label: "Google Cloud plugin", slug: "docs/integrations/google-cloud" },
+    ],
+  },
+  {
+    label: "Tutorials",
+    items: [
+      { label: "Chat with a PDF", slug: "docs/tutorials/chat-with-pdf" },
+      {
+        label: "Summarize YouTube videos",
+        slug: "docs/tutorials/summarize-youtube-videos",
+      },
     ],
   },
   {
