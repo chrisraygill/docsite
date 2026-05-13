@@ -1,42 +1,31 @@
 ---
-title: Express
-description: Start from an Express server and expose the same recipe flow from the main quickstart as an HTTP API.
+title: NestJS
+description: Start from a NestJS app and expose Genkit flows as HTTP endpoints using a controller and the fetch handler.
 supportedLanguages:
   - js
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
 
-Use this guide when you're starting from an Express backend and want the quickest path to a working Genkit integration.
+Use this guide when you're starting from a NestJS app and want to expose Genkit flows as HTTP endpoints.
 
 ## Before you begin
 
 - Node.js v20 or later
 - npm
 
-This guide assumes you're already familiar with building Express applications.
+This guide assumes you're already familiar with building NestJS applications.
 
 ## Create a project
 
-If you don't already have an Express project, create one:
+If you don't already have a NestJS project, create one:
 
 ```bash
-# Create and navigate to a new directory
-mkdir my-genkit-express
-cd my-genkit-express
-
-# Initialize a new Node.js project
-npm init -y
-npm pkg set type=module
-
-# Install and configure TypeScript
-npm install -D typescript tsx @types/node @types/express
-npx tsc --init
-
-# Set up your source directory
-mkdir src
-touch src/index.ts
+npx @nestjs/cli new my-genkit-nestjs
+cd my-genkit-nestjs
 ```
+
+When prompted, choose your preferred package manager.
 
 ## Project layout
 
@@ -45,7 +34,11 @@ touch src/index.ts
 - package.json
 - tsconfig.json
 - src
-  - **index.ts**
+  - **app.module.ts**
+  - main.ts
+  - genkit
+    - **recipeGeneratorFlow.ts**
+    - **genkit.controller.ts**
 
 </FileTree>
 
@@ -60,7 +53,8 @@ npm install -g genkit-cli
 Then install the packages you need in your project:
 
 ```bash
-npm install express genkit @genkit-ai/google-genai @genkit-ai/express
+npm install genkit @genkit-ai/google-genai @genkit-ai/fetch
+npm install -D tsx
 ```
 
 ## Configure your model API key
@@ -71,14 +65,12 @@ This guide uses the Gemini API from Google AI Studio.
 export GEMINI_API_KEY=<your API key>
 ```
 
-## Create your application
+## Define your recipe flow
 
-Update `src/index.ts` with the same recipe flow used in the main quickstart, then expose it through Express:
+Create `src/genkit/recipeGeneratorFlow.ts`:
 
-```ts title="src/index.ts"
-import express from 'express';
+```ts title="src/genkit/recipeGeneratorFlow.ts"
 import { googleAI } from '@genkit-ai/google-genai';
-import { expressHandler } from '@genkit-ai/express';
 import { genkit, z } from 'genkit';
 
 const ai = genkit({
@@ -107,7 +99,7 @@ const RecipeSchema = z.object({
   tips: z.array(z.string()).optional(),
 });
 
-const recipeGeneratorFlow = ai.defineFlow(
+export const recipeGeneratorFlow = ai.defineFlow(
   {
     name: 'recipeGeneratorFlow',
     inputSchema: RecipeInputSchema,
@@ -127,15 +119,77 @@ const recipeGeneratorFlow = ai.defineFlow(
     return output;
   },
 );
+```
 
-const app = express();
-app.use(express.json());
+## Create a controller
 
-app.post('/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
+Create `src/genkit/genkit.controller.ts` to expose the flow using Genkit's fetch handler:
 
-app.listen(8080, () => {
-  console.log('Express server listening on http://localhost:8080');
-});
+```ts title="src/genkit/genkit.controller.ts"
+import { Controller, Post, Req, Res } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { recipeGeneratorFlow } from './recipeGeneratorFlow';
+import { fetchHandlers } from '@genkit-ai/fetch';
+import { Readable } from 'node:stream';
+
+const handleFlow = fetchHandlers(
+  [recipeGeneratorFlow],
+  '/genkit',
+);
+
+@Controller('genkit')
+export class GenkitController {
+  @Post('*')
+  async handleGenkit(@Req() req: Request, @Res() res: Response) {
+    // Convert Express request to Web Request
+    const url = new URL(req.url, `${req.protocol}://${req.get('host')}`);
+    const headers = new Headers();
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (value === undefined) continue;
+      if (Array.isArray(value)) {
+        value.forEach(v => headers.append(key, v));
+      } else {
+        headers.set(key, String(value));
+      }
+    }
+
+    const webRequest = new Request(url, {
+      method: req.method,
+      headers,
+      body: req.method !== 'GET' && req.method !== 'HEAD'
+        ? JSON.stringify(req.body)
+        : undefined,
+    });
+
+    const webResponse = await handleFlow(webRequest);
+    res.status(webResponse.status);
+    webResponse.headers.forEach((value, key) => {
+      res.setHeader(key, value);
+    });
+
+    if (webResponse.body) {
+      Readable.fromWeb(webResponse.body).pipe(res);
+    } else {
+      res.end();
+    }
+  }
+}
+```
+
+NestJS uses Express under the hood. The controller converts the Express `Request` to a Web `Request` that `fetchHandlers` expects, then streams the Web `Response` back through Express.
+
+## Register the controller
+
+Add the `GenkitController` to your `AppModule`:
+
+```ts title="src/app.module.ts"
+import { Module } from '@nestjs/common';
+import { GenkitController } from './genkit/genkit.controller';
+
+@Module({
+  controllers: [GenkitController],
+})
+export class AppModule {}
 ```
 
 ## Run your application
@@ -143,13 +197,13 @@ app.listen(8080, () => {
 Run your app locally:
 
 ```bash
-npx tsx src/index.ts
+npm run start:dev
 ```
 
-You can also launch it through the Developer UI:
+You can also launch the Developer UI alongside your flow code:
 
 ```bash
-genkit start -- npx tsx --watch src/index.ts
+genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
 ```
 
 ## Test your flow
@@ -157,7 +211,7 @@ genkit start -- npx tsx --watch src/index.ts
 With the server running, call your flow over HTTP:
 
 ```bash
-curl -X POST http://localhost:8080/recipeGeneratorFlow \
+curl -X POST http://localhost:3000/genkit/recipeGeneratorFlow \
   -H "Content-Type: application/json" \
   -d '{"data":{"ingredient":"avocado","dietaryRestrictions":"vegetarian"}}'
 ```
@@ -175,7 +229,7 @@ The Genkit CLI is required to run the Developer UI. If you followed the installa
 Run the following command from your project root:
 
 ```bash
-genkit start -- npx tsx --watch src/index.ts
+genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
 ```
 
 This starts your app and launches the Developer UI at `http://localhost:4000` by default.
@@ -190,7 +244,7 @@ To make starting the Developer UI easier, add the following to your `package.jso
 
 ```json
 "scripts": {
-  "genkit:ui": "genkit start -- npx tsx --watch src/index.ts"
+  "genkit:ui": "genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts"
 }
 ```
 
@@ -232,26 +286,6 @@ In the Developer UI:
      run a Genkit flow in the Developer UI, showing the recipe generator flow
      with input parameters and the resulting structured output.
    </video>
-
-## Serving models
-
-You can also expose a model directly with `expressHandler` so other Genkit apps can consume it as a remote model. For example:
-
-```ts title="src/index.ts"
-import express from 'express';
-import { expressHandler } from '@genkit-ai/express';
-import { openAI } from '@genkit-ai/compat-oai/openai';
-
-(async () => {
-  const oai = openAI();
-  const gpt5 = await oai.model('gpt-5');
-
-  const app = express();
-  app.use(express.json());
-  app.post('/models/gpt5', expressHandler(gpt5));
-  app.listen(8080);
-})();
-```
 
 ## Next steps
 

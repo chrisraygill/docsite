@@ -1,41 +1,31 @@
 ---
-title: Express
-description: Start from an Express server and expose the same recipe flow from the main quickstart as an HTTP API.
+title: Hono
+description: Start from a Hono server and expose the same recipe flow from the main quickstart using the fetch plugin.
 supportedLanguages:
   - js
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
 
-Use this guide when you're starting from an Express backend and want the quickest path to a working Genkit integration.
+Use this guide when you're building with Hono and want to expose Genkit flows over HTTP using `@genkit-ai/fetch`. This pattern works well for Node.js and other fetch-based runtimes.
 
 ## Before you begin
 
 - Node.js v20 or later
 - npm
 
-This guide assumes you're already familiar with building Express applications.
+This guide assumes you're already familiar with building TypeScript server applications.
 
 ## Create a project
 
-If you don't already have an Express project, create one:
+If you don't already have a Hono project, create one:
 
 ```bash
-# Create and navigate to a new directory
-mkdir my-genkit-express
-cd my-genkit-express
+# Create a new Hono app with the Node.js template
+npm create hono@latest my-genkit-hono -- --template nodejs --pm npm --install
 
-# Initialize a new Node.js project
-npm init -y
-npm pkg set type=module
-
-# Install and configure TypeScript
-npm install -D typescript tsx @types/node @types/express
-npx tsc --init
-
-# Set up your source directory
-mkdir src
-touch src/index.ts
+# Navigate to the project
+cd my-genkit-hono
 ```
 
 ## Project layout
@@ -60,7 +50,8 @@ npm install -g genkit-cli
 Then install the packages you need in your project:
 
 ```bash
-npm install express genkit @genkit-ai/google-genai @genkit-ai/express
+npm install genkit @genkit-ai/google-genai @genkit-ai/fetch hono
+npm install -D @hono/node-server
 ```
 
 ## Configure your model API key
@@ -73,13 +64,14 @@ export GEMINI_API_KEY=<your API key>
 
 ## Create your application
 
-Update `src/index.ts` with the same recipe flow used in the main quickstart, then expose it through Express:
+Update `src/index.ts` with the same recipe flow used in the main quickstart, then expose it through Hono:
 
 ```ts title="src/index.ts"
-import express from 'express';
+import { serve } from '@hono/node-server';
+import { handleFlows } from '@genkit-ai/fetch';
 import { googleAI } from '@genkit-ai/google-genai';
-import { expressHandler } from '@genkit-ai/express';
 import { genkit, z } from 'genkit';
+import { Hono } from 'hono';
 
 const ai = genkit({
   plugins: [googleAI()],
@@ -128,14 +120,22 @@ const recipeGeneratorFlow = ai.defineFlow(
   },
 );
 
-const app = express();
-app.use(express.json());
+const app = new Hono();
+const flows = [recipeGeneratorFlow];
 
-app.post('/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
-
-app.listen(8080, () => {
-  console.log('Express server listening on http://localhost:8080');
+app.post('/api/:flowName', async (c) => {
+  return handleFlows(c.req.raw, flows, '/api/');
 });
+
+serve(
+  {
+    fetch: app.fetch,
+    port: 3780,
+  },
+  (info) => {
+    console.log(`Hono server listening on http://localhost:${info.port}`);
+  },
+);
 ```
 
 ## Run your application
@@ -157,7 +157,7 @@ genkit start -- npx tsx --watch src/index.ts
 With the server running, call your flow over HTTP:
 
 ```bash
-curl -X POST http://localhost:8080/recipeGeneratorFlow \
+curl -X POST http://localhost:3780/api/recipeGeneratorFlow \
   -H "Content-Type: application/json" \
   -d '{"data":{"ingredient":"avocado","dietaryRestrictions":"vegetarian"}}'
 ```
@@ -232,26 +232,6 @@ In the Developer UI:
      run a Genkit flow in the Developer UI, showing the recipe generator flow
      with input parameters and the resulting structured output.
    </video>
-
-## Serving models
-
-You can also expose a model directly with `expressHandler` so other Genkit apps can consume it as a remote model. For example:
-
-```ts title="src/index.ts"
-import express from 'express';
-import { expressHandler } from '@genkit-ai/express';
-import { openAI } from '@genkit-ai/compat-oai/openai';
-
-(async () => {
-  const oai = openAI();
-  const gpt5 = await oai.model('gpt-5');
-
-  const app = express();
-  app.use(express.json());
-  app.post('/models/gpt5', expressHandler(gpt5));
-  app.listen(8080);
-})();
-```
 
 ## Next steps
 

@@ -1,6 +1,6 @@
 ---
-title: Angular
-description: Add Genkit AI features to an Angular app — either with SSR server routes or by connecting to a standalone Genkit backend in any language.
+title: SvelteKit
+description: Add Genkit AI features to a SvelteKit app — either with built-in API routes or by connecting to a standalone Genkit backend in any language.
 supportedLanguages:
   - js
   - go
@@ -11,37 +11,25 @@ supportedLanguages:
 import { FileTree } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 
-Use this guide when you're starting from an Angular app and want a practical Genkit setup with a server route and frontend call. You can either define Genkit flows directly in Angular SSR server routes, or connect your Angular frontend to a standalone Genkit backend written in any language.
+Use this guide to add Genkit to a SvelteKit app. You can either define Genkit flows directly in SvelteKit API routes, or connect your SvelteKit frontend to a standalone Genkit backend written in any language.
 
 ## Before you begin
 
 - Node.js v20 or later
 - npm
-- Angular CLI
 
-This guide assumes you're already familiar with building Angular applications.
+This guide assumes you're already familiar with building SvelteKit applications.
 
 ## Create a project
 
-<Lang lang="js">
-
-This path uses Angular with SSR and server routing so Genkit can run server-side:
+If you don't already have a SvelteKit project, create one:
 
 ```bash
-ng new --ssr --server-routing
+npx sv create my-genkit-sveltekit
+cd my-genkit-sveltekit
 ```
 
-</Lang>
-
-<Lang lang="go dart python">
-
-Create a standard Angular project:
-
-```bash
-ng new
-```
-
-</Lang>
+When prompted, select the **Minimal** template and enable TypeScript.
 
 <Lang lang="go dart python">
 
@@ -50,7 +38,7 @@ ng new
 Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
 
 1. **Set up your backend** — follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
-2. **Call flows from Angular** — use `runFlow` from the Genkit client library in your Angular components, pointing to your backend's URL.
+2. **Call flows from SvelteKit** — use `runFlow` from the Genkit client library in your Svelte components, pointing to your backend's URL.
 
 ### Install the client library
 
@@ -60,53 +48,36 @@ npm install genkit
 
 ### Call a flow
 
-```ts title="src/app/app.component.ts"
-import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { runFlow } from 'genkit/beta/client';
+```svelte title="src/routes/+page.svelte"
+<script lang="ts">
+  import { runFlow } from 'genkit/beta/client';
 
-@Component({
-  selector: 'app-root',
-  imports: [FormsModule],
-  templateUrl: './app.component.html',
-})
-export class AppComponent {
-  ingredient = signal('avocado');
-  dietaryRestrictions = signal('vegetarian');
-  recipe = signal<any | null>(null);
+  let ingredient = 'avocado';
+  let dietaryRestrictions = 'vegetarian';
+  let recipe: any = null;
 
-  async generateRecipe() {
-    const result = await runFlow({
+  async function generateRecipe() {
+    recipe = await runFlow({
       url: 'http://localhost:3000/recipeGeneratorFlow',
-      input: {
-        ingredient: this.ingredient(),
-        dietaryRestrictions: this.dietaryRestrictions(),
-      },
+      input: { ingredient, dietaryRestrictions },
     });
-
-    this.recipe.set(result);
   }
-}
-```
+</script>
 
-```html title="src/app/app.component.html"
 <main>
   <h1>Recipe generator</h1>
-  <input
-    [ngModel]="ingredient()"
-    (ngModelChange)="ingredient.set($event)"
-    placeholder="Ingredient"
-  />
-  <input
-    [ngModel]="dietaryRestrictions()"
-    (ngModelChange)="dietaryRestrictions.set($event)"
-    placeholder="Dietary restrictions"
-  />
-  <button (click)="generateRecipe()">Generate recipe</button>
-
-  @if (recipe()) {
-    <pre>{{ recipe() | json }}</pre>
-  }
+  <label>
+    Ingredient
+    <input bind:value={ingredient} />
+  </label>
+  <label>
+    Dietary restrictions
+    <input bind:value={dietaryRestrictions} />
+  </label>
+  <button on:click={generateRecipe}>Generate recipe</button>
+  {#if recipe}
+    <pre>{JSON.stringify(recipe, null, 2)}</pre>
+  {/if}
 </main>
 ```
 
@@ -121,13 +92,16 @@ Replace `http://localhost:3000` with your backend's address. See the [Web client
 <FileTree>
 
 - package.json
+- svelte.config.js
 - src
-  - app
-    - **app.component.html**
-    - **app.component.ts**
-  - genkit
-    - **recipeGeneratorFlow.ts**
-  - **server.ts**
+  - routes
+    - api
+      - recipeGeneratorFlow
+        - **\[...path\]/+server.ts**
+    - **+page.svelte**
+  - lib
+    - genkit
+      - **recipeGeneratorFlow.ts**
 
 </FileTree>
 
@@ -142,7 +116,7 @@ npm install -g genkit-cli
 Then install the packages you need in your project:
 
 ```bash
-npm install genkit @genkit-ai/google-genai @genkit-ai/express
+npm install genkit @genkit-ai/google-genai @genkit-ai/fetch
 npm install -D tsx
 ```
 
@@ -156,9 +130,9 @@ export GEMINI_API_KEY=<your API key>
 
 ## Define your recipe flow
 
-Create `src/genkit/recipeGeneratorFlow.ts`:
+Create `src/lib/genkit/recipeGeneratorFlow.ts`:
 
-```ts title="src/genkit/recipeGeneratorFlow.ts"
+```ts title="src/lib/genkit/recipeGeneratorFlow.ts"
 import { googleAI } from '@genkit-ai/google-genai';
 import { genkit, z } from 'genkit';
 
@@ -210,101 +184,89 @@ export const recipeGeneratorFlow = ai.defineFlow(
 );
 ```
 
-## Add a server route
+## Create an API route
 
-In `src/server.ts`, add:
+Create `src/routes/api/recipeGeneratorFlow/[...path]/+server.ts` to expose the flow using Genkit's fetch handler:
 
-```ts title="src/server.ts"
-import { expressHandler } from '@genkit-ai/express';
-import { recipeGeneratorFlow } from './genkit/recipeGeneratorFlow';
+```ts title="src/routes/api/recipeGeneratorFlow/[...path]/+server.ts"
+import type { RequestHandler } from './$types';
+import { recipeGeneratorFlow } from '$lib/genkit/recipeGeneratorFlow';
+import { fetchHandlers } from '@genkit-ai/fetch';
+
+const handleFlow = fetchHandlers(
+  [recipeGeneratorFlow],
+  '/api/recipeGeneratorFlow',
+);
+
+export const POST: RequestHandler = async ({ request }) => {
+  return handleFlow(request);
+};
 ```
 
-Then register the route after your `app` is created:
+SvelteKit API routes receive a standard Web `Request` object, so `fetchHandlers` works directly without any adapter.
 
-```ts
-app.use(express.json());
-app.post('/api/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
-```
+## Call your flow from the frontend
 
-## Call your flow from Angular
+Update `src/routes/+page.svelte`:
 
-Update `src/app/app.component.ts`:
+```svelte title="src/routes/+page.svelte"
+<script lang="ts">
+  import { runFlow } from 'genkit/beta/client';
 
-```ts title="src/app/app.component.ts"
-import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { runFlow } from 'genkit/beta/client';
+  let ingredient = 'avocado';
+  let dietaryRestrictions = 'vegetarian';
+  let recipe: any = null;
 
-@Component({
-  selector: 'app-root',
-  imports: [FormsModule],
-  templateUrl: './app.component.html',
-})
-export class AppComponent {
-  ingredient = signal('avocado');
-  dietaryRestrictions = signal('vegetarian');
-  recipe = signal<any | null>(null);
-
-  async generateRecipe() {
-    const result = await runFlow({
+  async function generateRecipe() {
+    recipe = await runFlow({
       url: '/api/recipeGeneratorFlow',
-      input: {
-        ingredient: this.ingredient(),
-        dietaryRestrictions: this.dietaryRestrictions(),
-      },
+      input: { ingredient, dietaryRestrictions },
     });
-
-    this.recipe.set(result);
   }
-}
-```
+</script>
 
-Update `src/app/app.component.html`:
-
-```html title="src/app/app.component.html"
 <main>
   <h1>Recipe generator</h1>
-  <input
-    [ngModel]="ingredient()"
-    (ngModelChange)="ingredient.set($event)"
-    placeholder="Ingredient"
-  />
-  <input
-    [ngModel]="dietaryRestrictions()"
-    (ngModelChange)="dietaryRestrictions.set($event)"
-    placeholder="Dietary restrictions"
-  />
-  <button (click)="generateRecipe()">Generate recipe</button>
-
-  @if (recipe()) {
-    <pre>{{ recipe() | json }}</pre>
-  }
+  <label>
+    Ingredient
+    <input bind:value={ingredient} />
+  </label>
+  <label>
+    Dietary restrictions
+    <input bind:value={dietaryRestrictions} />
+  </label>
+  <button on:click={generateRecipe}>Generate recipe</button>
+  {#if recipe}
+    <pre>{JSON.stringify(recipe, null, 2)}</pre>
+  {/if}
 </main>
 ```
 
 ## Run your application
 
-Run your app locally as normal:
+Run your app locally:
 
 ```bash
-npm start
+npm run dev
 ```
 
 You can also launch the Developer UI alongside your flow code:
 
 ```bash
-genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
+genkit start -- npx tsx --watch src/lib/genkit/recipeGeneratorFlow.ts
 ```
 
 ## Test your flow
 
-You can test the route directly:
+With the server running, call your flow over HTTP:
 
 ```bash
-curl -X POST http://localhost:4200/api/recipeGeneratorFlow \
+curl -X POST http://localhost:5173/api/recipeGeneratorFlow \
   -H "Content-Type: application/json" \
   -d '{"data":{"ingredient":"avocado","dietaryRestrictions":"vegetarian"}}'
 ```
+
+You should receive a structured recipe in the response.
 
 ## Test in the Developer UI
 
@@ -317,7 +279,7 @@ The Genkit CLI is required to run the Developer UI. If you followed the installa
 Run the following command from your project root:
 
 ```bash
-genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
+genkit start -- npx tsx --watch src/lib/genkit/recipeGeneratorFlow.ts
 ```
 
 This starts your app and launches the Developer UI at `http://localhost:4000` by default.
@@ -325,22 +287,6 @@ This starts your app and launches the Developer UI at `http://localhost:4000` by
 :::note
 The command after `--` should run the file that defines or imports your Genkit components. You can use `tsx`, `node`, or other commands based on your setup. Learn more in [developer tools](/docs/devtools).
 :::
-
-##### Optional: Add an npm script
-
-To make starting the Developer UI easier, add the following to your `package.json` scripts:
-
-```json
-"scripts": {
-  "genkit:ui": "genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts"
-}
-```
-
-Then run it with:
-
-```bash
-npm run genkit:ui
-```
 
 ### Run and inspect flows
 

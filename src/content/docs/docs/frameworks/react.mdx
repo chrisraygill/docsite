@@ -1,0 +1,103 @@
+---
+title: React (Vite)
+description: Add Genkit AI features to a React app built with Vite by connecting to a standalone Genkit backend in any language.
+isLanguageAgnostic: true
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+
+Use this guide when you're building a React app with Vite and want to call Genkit flows from a standalone backend.
+
+React apps built with Vite run entirely in the browser, so Genkit flows always run on a separate backend server. You'll set up the backend and frontend independently.
+
+## Before you begin
+
+- Node.js v20 or later
+- npm
+
+This guide assumes you're already familiar with building React applications.
+
+## Create a project
+
+If you don't already have a React project, create one:
+
+```bash
+npm create vite@latest my-genkit-react -- --template react-ts
+cd my-genkit-react
+npm install
+```
+
+## Set up your backend
+
+Follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints. Any server framework works — Express, Hono, Fastify, FastAPI, Gin, and others are all supported.
+
+## Install the client library
+
+In your React project, install the Genkit client:
+
+```bash
+npm install genkit
+```
+
+## Call a flow from React
+
+Create a component that calls your backend flow using `runFlow`:
+
+```tsx title="src/App.tsx"
+import { useState } from 'react';
+import { runFlow } from 'genkit/beta/client';
+
+function App() {
+  const [ingredient, setIngredient] = useState('avocado');
+  const [dietaryRestrictions, setDietaryRestrictions] = useState('vegetarian');
+  const [recipe, setRecipe] = useState<any>(null);
+
+  async function generateRecipe() {
+    const result = await runFlow({
+      url: 'http://localhost:3000/recipeGeneratorFlow',
+      input: { ingredient, dietaryRestrictions },
+    });
+    setRecipe(result);
+  }
+
+  return (
+    <main>
+      <h1>Recipe generator</h1>
+      <label>
+        Ingredient
+        <input value={ingredient} onChange={(e) => setIngredient(e.target.value)} />
+      </label>
+      <label>
+        Dietary restrictions
+        <input
+          value={dietaryRestrictions}
+          onChange={(e) => setDietaryRestrictions(e.target.value)}
+        />
+      </label>
+      <button onClick={generateRecipe}>Generate recipe</button>
+      {recipe && <pre>{JSON.stringify(recipe, null, 2)}</pre>}
+    </main>
+  );
+}
+
+export default App;
+```
+
+Replace `http://localhost:3000` with your backend's address. See the [Web client](/docs/frontend/web-client) guide for streaming and advanced patterns.
+
+## Run your application
+
+Start the Vite dev server:
+
+```bash
+npm run dev
+```
+
+Make sure your backend server is also running so the React app can reach the flow endpoint.
+
+## Next steps
+
+- [Creating flows](/docs/flows)
+- [Generating content](/docs/models)
+- [Connect a web frontend](/docs/frontend/web-client)
+- [Developer tools](/docs/devtools)

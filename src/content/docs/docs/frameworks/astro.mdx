@@ -1,6 +1,6 @@
 ---
-title: Angular
-description: Add Genkit AI features to an Angular app — either with SSR server routes or by connecting to a standalone Genkit backend in any language.
+title: Astro
+description: Add Genkit AI features to an Astro SSR app — either with built-in API routes or by connecting to a standalone Genkit backend in any language.
 supportedLanguages:
   - js
   - go
@@ -11,37 +11,25 @@ supportedLanguages:
 import { FileTree } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 
-Use this guide when you're starting from an Angular app and want a practical Genkit setup with a server route and frontend call. You can either define Genkit flows directly in Angular SSR server routes, or connect your Angular frontend to a standalone Genkit backend written in any language.
+Use this guide when you're starting from an Astro app with server-side rendering (SSR) and want to add Genkit flows as API endpoints alongside your Astro pages. You can either define Genkit flows directly in Astro API routes, or connect your Astro frontend to a standalone Genkit backend written in any language.
 
 ## Before you begin
 
 - Node.js v20 or later
 - npm
-- Angular CLI
 
-This guide assumes you're already familiar with building Angular applications.
+This guide assumes you're already familiar with building Astro applications.
 
 ## Create a project
 
-<Lang lang="js">
-
-This path uses Angular with SSR and server routing so Genkit can run server-side:
+If you don't already have an Astro project, create one:
 
 ```bash
-ng new --ssr --server-routing
+npm create astro@latest my-genkit-astro
+cd my-genkit-astro
 ```
 
-</Lang>
-
-<Lang lang="go dart python">
-
-Create a standard Angular project:
-
-```bash
-ng new
-```
-
-</Lang>
+When prompted, select the **Empty** template and enable TypeScript.
 
 <Lang lang="go dart python">
 
@@ -50,7 +38,7 @@ ng new
 Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
 
 1. **Set up your backend** — follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
-2. **Call flows from Angular** — use `runFlow` from the Genkit client library in your Angular components, pointing to your backend's URL.
+2. **Call flows from Astro** — use `runFlow` from the Genkit client library in your client-side scripts, pointing to your backend's URL.
 
 ### Install the client library
 
@@ -60,54 +48,46 @@ npm install genkit
 
 ### Call a flow
 
-```ts title="src/app/app.component.ts"
-import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { runFlow } from 'genkit/beta/client';
+```astro title="src/pages/index.astro"
+---
+// No server-side logic needed for this page
+---
 
-@Component({
-  selector: 'app-root',
-  imports: [FormsModule],
-  templateUrl: './app.component.html',
-})
-export class AppComponent {
-  ingredient = signal('avocado');
-  dietaryRestrictions = signal('vegetarian');
-  recipe = signal<any | null>(null);
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Recipe generator</title>
+  </head>
+  <body>
+    <h1>Recipe generator</h1>
+    <label>
+      Ingredient
+      <input id="ingredient" value="avocado" />
+    </label>
+    <label>
+      Dietary restrictions
+      <input id="dietary" value="vegetarian" />
+    </label>
+    <button id="generate">Generate recipe</button>
+    <pre id="result"></pre>
 
-  async generateRecipe() {
-    const result = await runFlow({
-      url: 'http://localhost:3000/recipeGeneratorFlow',
-      input: {
-        ingredient: this.ingredient(),
-        dietaryRestrictions: this.dietaryRestrictions(),
-      },
-    });
+    <script>
+      import { runFlow } from 'genkit/beta/client';
 
-    this.recipe.set(result);
-  }
-}
-```
+      document.getElementById('generate')!.addEventListener('click', async () => {
+        const ingredient = (document.getElementById('ingredient') as HTMLInputElement).value;
+        const dietaryRestrictions = (document.getElementById('dietary') as HTMLInputElement).value;
 
-```html title="src/app/app.component.html"
-<main>
-  <h1>Recipe generator</h1>
-  <input
-    [ngModel]="ingredient()"
-    (ngModelChange)="ingredient.set($event)"
-    placeholder="Ingredient"
-  />
-  <input
-    [ngModel]="dietaryRestrictions()"
-    (ngModelChange)="dietaryRestrictions.set($event)"
-    placeholder="Dietary restrictions"
-  />
-  <button (click)="generateRecipe()">Generate recipe</button>
+        const result = await runFlow({
+          url: 'http://localhost:3000/recipeGeneratorFlow',
+          input: { ingredient, dietaryRestrictions },
+        });
 
-  @if (recipe()) {
-    <pre>{{ recipe() | json }}</pre>
-  }
-</main>
+        document.getElementById('result')!.textContent = JSON.stringify(result, null, 2);
+      });
+    </script>
+  </body>
+</html>
 ```
 
 Replace `http://localhost:3000` with your backend's address. See the [Web client](/docs/frontend/web-client) guide for streaming and advanced patterns.
@@ -116,18 +96,46 @@ Replace `http://localhost:3000` with your backend's address. See the [Web client
 
 <Lang lang="js">
 
+### Enable SSR
+
+Install the Node.js adapter so your Astro app can run server-side code:
+
+```bash
+npx astro add node
+```
+
+This adds `@astrojs/node` and configures `astro.config.mjs` automatically. If you prefer to do it manually, install the adapter and update your config:
+
+```bash
+npm install @astrojs/node
+```
+
+```ts title="astro.config.mjs"
+import { defineConfig } from 'astro/config';
+import node from '@astrojs/node';
+
+export default defineConfig({
+  output: 'server',
+  adapter: node({
+    mode: 'standalone',
+  }),
+});
+```
+
 ## Project layout
 
 <FileTree>
 
 - package.json
+- astro.config.mjs
 - src
-  - app
-    - **app.component.html**
-    - **app.component.ts**
+  - pages
+    - api
+      - recipeGeneratorFlow
+        - **\[...path\].ts**
+    - **index.astro**
   - genkit
     - **recipeGeneratorFlow.ts**
-  - **server.ts**
 
 </FileTree>
 
@@ -142,7 +150,7 @@ npm install -g genkit-cli
 Then install the packages you need in your project:
 
 ```bash
-npm install genkit @genkit-ai/google-genai @genkit-ai/express
+npm install genkit @genkit-ai/google-genai @genkit-ai/fetch
 npm install -D tsx
 ```
 
@@ -210,84 +218,79 @@ export const recipeGeneratorFlow = ai.defineFlow(
 );
 ```
 
-## Add a server route
+## Create an API route
 
-In `src/server.ts`, add:
+Create `src/pages/api/recipeGeneratorFlow/[...path].ts` to expose the flow as an HTTP endpoint using Genkit's fetch handler:
 
-```ts title="src/server.ts"
-import { expressHandler } from '@genkit-ai/express';
-import { recipeGeneratorFlow } from './genkit/recipeGeneratorFlow';
+```ts title="src/pages/api/recipeGeneratorFlow/[...path].ts"
+import type { APIRoute } from 'astro';
+import { recipeGeneratorFlow } from '../../../genkit/recipeGeneratorFlow';
+import { fetchHandlers } from '@genkit-ai/fetch';
+
+const handleFlow = fetchHandlers(
+  [recipeGeneratorFlow],
+  '/api/recipeGeneratorFlow',
+);
+
+export const POST: APIRoute = async ({ request }) => {
+  return handleFlow(request);
+};
 ```
 
-Then register the route after your `app` is created:
+The `fetchHandlers` function wraps your Genkit flow in Genkit's HTTP protocol, which supports streaming chunks, structured errors, and compatibility with the Genkit client SDK.
 
-```ts
-app.use(express.json());
-app.post('/api/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
-```
+## Call your flow from the frontend
 
-## Call your flow from Angular
+Update `src/pages/index.astro`:
 
-Update `src/app/app.component.ts`:
+```astro title="src/pages/index.astro"
+---
+// No server-side logic needed for this page
+---
 
-```ts title="src/app/app.component.ts"
-import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { runFlow } from 'genkit/beta/client';
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Recipe generator</title>
+  </head>
+  <body>
+    <h1>Recipe generator</h1>
+    <label>
+      Ingredient
+      <input id="ingredient" value="avocado" />
+    </label>
+    <label>
+      Dietary restrictions
+      <input id="dietary" value="vegetarian" />
+    </label>
+    <button id="generate">Generate recipe</button>
+    <pre id="result"></pre>
 
-@Component({
-  selector: 'app-root',
-  imports: [FormsModule],
-  templateUrl: './app.component.html',
-})
-export class AppComponent {
-  ingredient = signal('avocado');
-  dietaryRestrictions = signal('vegetarian');
-  recipe = signal<any | null>(null);
+    <script>
+      import { runFlow } from 'genkit/beta/client';
 
-  async generateRecipe() {
-    const result = await runFlow({
-      url: '/api/recipeGeneratorFlow',
-      input: {
-        ingredient: this.ingredient(),
-        dietaryRestrictions: this.dietaryRestrictions(),
-      },
-    });
+      document.getElementById('generate')!.addEventListener('click', async () => {
+        const ingredient = (document.getElementById('ingredient') as HTMLInputElement).value;
+        const dietaryRestrictions = (document.getElementById('dietary') as HTMLInputElement).value;
 
-    this.recipe.set(result);
-  }
-}
-```
+        const result = await runFlow({
+          url: '/api/recipeGeneratorFlow',
+          input: { ingredient, dietaryRestrictions },
+        });
 
-Update `src/app/app.component.html`:
-
-```html title="src/app/app.component.html"
-<main>
-  <h1>Recipe generator</h1>
-  <input
-    [ngModel]="ingredient()"
-    (ngModelChange)="ingredient.set($event)"
-    placeholder="Ingredient"
-  />
-  <input
-    [ngModel]="dietaryRestrictions()"
-    (ngModelChange)="dietaryRestrictions.set($event)"
-    placeholder="Dietary restrictions"
-  />
-  <button (click)="generateRecipe()">Generate recipe</button>
-
-  @if (recipe()) {
-    <pre>{{ recipe() | json }}</pre>
-  }
-</main>
+        document.getElementById('result')!.textContent = JSON.stringify(result, null, 2);
+      });
+    </script>
+  </body>
+</html>
 ```
 
 ## Run your application
 
-Run your app locally as normal:
+Run your app locally:
 
 ```bash
-npm start
+npm run dev
 ```
 
 You can also launch the Developer UI alongside your flow code:
@@ -298,13 +301,15 @@ genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
 
 ## Test your flow
 
-You can test the route directly:
+With the server running, call your flow over HTTP:
 
 ```bash
-curl -X POST http://localhost:4200/api/recipeGeneratorFlow \
+curl -X POST http://localhost:4321/api/recipeGeneratorFlow \
   -H "Content-Type: application/json" \
   -d '{"data":{"ingredient":"avocado","dietaryRestrictions":"vegetarian"}}'
 ```
+
+You should receive a structured recipe in the response.
 
 ## Test in the Developer UI
 
@@ -325,22 +330,6 @@ This starts your app and launches the Developer UI at `http://localhost:4000` by
 :::note
 The command after `--` should run the file that defines or imports your Genkit components. You can use `tsx`, `node`, or other commands based on your setup. Learn more in [developer tools](/docs/devtools).
 :::
-
-##### Optional: Add an npm script
-
-To make starting the Developer UI easier, add the following to your `package.json` scripts:
-
-```json
-"scripts": {
-  "genkit:ui": "genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts"
-}
-```
-
-Then run it with:
-
-```bash
-npm run genkit:ui
-```
 
 ### Run and inspect flows
 

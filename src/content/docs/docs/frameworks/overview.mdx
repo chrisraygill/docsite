@@ -1,0 +1,60 @@
+---
+title: Server integration
+description: Choose a server framework for your Genkit backend. Each guide shows how to expose Genkit flows as HTTP endpoints.
+supportedLanguages:
+  - js
+  - go
+  - dart
+  - python
+---
+
+import Lang from '../../../../components/Lang.astro';
+
+Pick the server framework that matches your backend. Each guide is self-contained and shows how to expose a Genkit flow as an HTTP endpoint that any client — web, mobile, or another service — can call.
+
+<Lang lang="js">
+
+## TypeScript / JavaScript
+
+- [Express](/docs/frameworks/express) — the most common Node.js backend framework. Good default if you don't have a preference.
+- [Hono](/docs/frameworks/hono) — Web-standard request/response handling that works across Node.js and edge-style runtimes.
+- [Fastify](/docs/frameworks/fastify) — high-performance Node.js server using the Genkit fetch plugin.
+- [NestJS](/docs/frameworks/nestjs) — progressive Node.js framework using a controller with the Genkit fetch handler.
+
+</Lang>
+
+<Lang lang="python">
+
+## Python
+
+- [FastAPI](/docs/frameworks/fastapi) — modern async APIs with automatic OpenAPI docs and typed request validation.
+- [Flask](/docs/frameworks/flask) — lightweight and flexible; good for adding Genkit to an existing Flask service.
+- [Django](/docs/frameworks/django) — for adding Genkit flows to Django projects using Django Ninja or REST framework.
+
+</Lang>
+
+<Lang lang="go">
+
+## Go
+
+- [Gin](/docs/frameworks/gin) — the most popular Go web framework, with rich middleware support.
+- [Echo](/docs/frameworks/echo) — high-performance Go framework with built-in middleware.
+- [Chi](/docs/frameworks/chi) — lightweight, composable router built on `net/http`.
+
+</Lang>
+
+<Lang lang="dart">
+
+## Dart
+
+- [Shelf](/docs/frameworks/shelf) — the standard Dart HTTP server framework.
+
+</Lang>
+
+## After your server is running
+
+Once your backend exposes flows as HTTP endpoints, connect a frontend:
+
+- [Web client](/docs/frontend/web-client) — call flows from any JavaScript/TypeScript web app
+- [Flutter](/docs/frontend/flutter) — call flows from a Flutter mobile, desktop, or web app
+- Or use any of the [app integration guides](/docs/frameworks/nextjs-app-router) — full-stack frameworks like Next.js, SvelteKit, Nuxt, and others can also consume a standalone Genkit backend
