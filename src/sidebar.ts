@@ -110,15 +110,15 @@ const DOCS_SIDEBAR = [
   {
     label: "Core concepts",
     items: [
-      { label: "Creating flows", slug: "docs/flows" },
+      { label: "Flows", slug: "docs/flows" },
       { label: "Generating content", slug: "docs/models" },
       { label: "Middleware", slug: "docs/middleware" },
       { label: "Tool calling", slug: "docs/tool-calling" },
-      { label: "Implementing Agentic Patterns", slug: "docs/agentic-patterns" },
-      { label: "Managing prompts with Dotprompt", slug: "docs/dotprompt" },
-      { label: "Passing information through context", slug: "docs/context" },
-      { label: "Pause generation using interrupts", slug: "docs/interrupts" },
-      { label: "Creating persistent chat sessions", slug: "docs/chat" },
+      { label: "Agentic patterns", slug: "docs/agentic-patterns" },
+      { label: "Prompt templating", slug: "docs/dotprompt" },
+      { label: "Runtime context", slug: "docs/context" },
+      { label: "Interrupts", slug: "docs/interrupts" },
+      { label: "Persistent chat", slug: "docs/chat" },
       {
         label: "Model Context Protocol (MCP)",
         slug: "docs/model-context-protocol",
@@ -236,7 +236,7 @@ const DOCS_SIDEBAR = [
     label: "Authorization",
     items: [
       {
-        label: "Authorization & Integrity",
+        label: "Authorization & integrity",
         slug: "docs/deployment/authorization",
       },
       { label: "Auth0 AI", slug: "docs/integrations/auth0" },
