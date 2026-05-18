@@ -11,6 +11,16 @@
   --sl-font-mono: 'Google Sans Mono', monospace;
 }
 
+/* Dark mode: black backgrounds for nav, sidebar, and main content */
+:root:not([data-theme='light']) {
+  --sl-color-black: #000000;
+  --sl-color-bg: #000000;
+  --sl-color-bg-nav: #000000;
+  --sl-color-bg-sidebar: #000000;
+  --sl-color-hairline: #1a1a1a;
+  --sl-color-hairline-shade: #181818;
+}
+
 :root {
   --sl-content-margin-inline: 1rem;
   --sl-content-pad-x: 3rem;
@@ -111,4 +121,9 @@ h1 {
 
 .right-sidebar-panel h2 {
   font-size: var(--sl-font-size-xs);
+}
+
+/* Make the Genkit logo bigger in the header */
+.site-title img {
+  height: calc(var(--sl-nav-height) - 2 * var(--sl-nav-pad-y) + 0.75rem);
 }

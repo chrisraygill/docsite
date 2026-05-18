@@ -21,15 +21,19 @@ const shouldRenderSearch =
 	<div class="title-wrapper sl-flex">
 		<SiteTitle />
 	</div>
-	<div class="sl-flex print:hidden">
-		{shouldRenderSearch && <Search />}
-	</div>
+	<div class="sl-flex grow"></div>
 	<div class="sl-hidden md:sl-flex print:hidden right-group">
+		<div class="sl-flex search-wrapper print:hidden">
+			{shouldRenderSearch && <Search />}
+		</div>
 		<div class="sl-flex social-icons">
 			<SocialIcons />
 		</div>
 		<ThemeSelect />
 		<LanguageSelect />
+	</div>
+	<div class="sl-flex md:sl-hidden print:hidden mobile-search">
+		{shouldRenderSearch && <Search />}
 	</div>
 </div>
 
@@ -57,10 +61,19 @@ const shouldRenderSearch =
       gap: 1rem;
       align-items: center;
     }
+
+    .search-wrapper {
+      align-items: center;
+    }
+
     .social-icons::after {
       content: "";
       height: 2rem;
       border-inline-end: 1px solid var(--sl-color-gray-5);
+    }
+
+    .mobile-search {
+      align-items: center;
     }
 
     @media (min-width: 50rem) {
@@ -81,14 +94,11 @@ const shouldRenderSearch =
         );
         display: grid;
         grid-template-columns:
-          /* 1 (site title): runs up until the main content column's left edge or the width of the title, whichever is the largest  */
-          minmax(
-            calc(var(--__sidebar-width) + max(0rem, var(--__main-column-fr) - var(--sl-nav-gap))),
-            auto
-          )
-          /* 2 (search box): all free space that is available. */
+          /* 1 (site title): takes needed space */
+          auto
+          /* 2 (spacer): fills remaining space to push right-group to the end */
           1fr
-          /* 3 (right items): use the space that these need. */
+          /* 3 (right items): search + social icons + theme select */
           auto;
         align-content: center;
       }
