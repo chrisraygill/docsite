@@ -31,69 +31,6 @@ cd my-genkit-astro
 
 When prompted, select the **Empty** template and enable TypeScript.
 
-<Lang lang="go dart python">
-
-## Connect to a standalone backend
-
-Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
-
-1. **Set up your backend** — follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
-2. **Call flows from Astro** — use `runFlow` from the Genkit client library in your client-side scripts, pointing to your backend's URL.
-
-### Install the client library
-
-```bash
-npm install genkit
-```
-
-### Call a flow
-
-```astro title="src/pages/index.astro"
----
-// No server-side logic needed for this page
----
-
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Recipe generator</title>
-  </head>
-  <body>
-    <h1>Recipe generator</h1>
-    <label>
-      Ingredient
-      <input id="ingredient" value="avocado" />
-    </label>
-    <label>
-      Dietary restrictions
-      <input id="dietary" value="vegetarian" />
-    </label>
-    <button id="generate">Generate recipe</button>
-    <pre id="result"></pre>
-
-    <script>
-      import { runFlow } from 'genkit/beta/client';
-
-      document.getElementById('generate')!.addEventListener('click', async () => {
-        const ingredient = (document.getElementById('ingredient') as HTMLInputElement).value;
-        const dietaryRestrictions = (document.getElementById('dietary') as HTMLInputElement).value;
-
-        const result = await runFlow({
-          url: 'http://localhost:3000/recipeGeneratorFlow',
-          input: { ingredient, dietaryRestrictions },
-        });
-
-        document.getElementById('result')!.textContent = JSON.stringify(result, null, 2);
-      });
-    </script>
-  </body>
-</html>
-```
-
-Replace `http://localhost:3000` with your backend's address. See the [Web client](/docs/frontend/web-client) guide for streaming and advanced patterns.
-
-</Lang>
-
 <Lang lang="js">
 
 ### Enable SSR
@@ -172,7 +109,7 @@ import { genkit, z } from 'genkit';
 
 const ai = genkit({
   plugins: [googleAI()],
-  model: googleAI.model('gemini-2.5-flash', {
+  model: googleAI.model('gemini-flash-latest', {
     temperature: 0.8,
   }),
 });
@@ -363,6 +300,69 @@ In the Developer UI:
      run a Genkit flow in the Developer UI, showing the recipe generator flow
      with input parameters and the resulting structured output.
    </video>
+
+</Lang>
+
+<Lang lang="go dart python">
+
+## Connect to a standalone backend
+
+Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
+
+1. **Set up your backend** — follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
+2. **Call flows from Astro** — use `runFlow` from the Genkit client library in your client-side scripts, pointing to your backend's URL.
+
+### Install the client library
+
+```bash
+npm install genkit
+```
+
+### Call a flow
+
+```astro title="src/pages/index.astro"
+---
+// No server-side logic needed for this page
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Recipe generator</title>
+  </head>
+  <body>
+    <h1>Recipe generator</h1>
+    <label>
+      Ingredient
+      <input id="ingredient" value="avocado" />
+    </label>
+    <label>
+      Dietary restrictions
+      <input id="dietary" value="vegetarian" />
+    </label>
+    <button id="generate">Generate recipe</button>
+    <pre id="result"></pre>
+
+    <script>
+      import { runFlow } from 'genkit/beta/client';
+
+      document.getElementById('generate')!.addEventListener('click', async () => {
+        const ingredient = (document.getElementById('ingredient') as HTMLInputElement).value;
+        const dietaryRestrictions = (document.getElementById('dietary') as HTMLInputElement).value;
+
+        const result = await runFlow({
+          url: 'http://localhost:3000/recipeGeneratorFlow',
+          input: { ingredient, dietaryRestrictions },
+        });
+
+        document.getElementById('result')!.textContent = JSON.stringify(result, null, 2);
+      });
+    </script>
+  </body>
+</html>
+```
+
+Replace `http://localhost:3000` with your backend's address. See the [Web client](/docs/frontend/web-client) guide for streaming and advanced patterns.
 
 </Lang>
 

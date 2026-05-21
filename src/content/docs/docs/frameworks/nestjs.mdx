@@ -75,7 +75,7 @@ import { genkit, z } from 'genkit';
 
 const ai = genkit({
   plugins: [googleAI()],
-  model: googleAI.model('gemini-2.5-flash', {
+  model: googleAI.model('gemini-flash-latest', {
     temperature: 0.8,
   }),
 });
@@ -132,10 +132,7 @@ import { recipeGeneratorFlow } from './recipeGeneratorFlow';
 import { fetchHandlers } from '@genkit-ai/fetch';
 import { Readable } from 'node:stream';
 
-const handleFlow = fetchHandlers(
-  [recipeGeneratorFlow],
-  '/genkit',
-);
+const handleFlow = fetchHandlers([recipeGeneratorFlow], '/genkit');
 
 @Controller('genkit')
 export class GenkitController {
@@ -147,7 +144,7 @@ export class GenkitController {
     for (const [key, value] of Object.entries(req.headers)) {
       if (value === undefined) continue;
       if (Array.isArray(value)) {
-        value.forEach(v => headers.append(key, v));
+        value.forEach((v) => headers.append(key, v));
       } else {
         headers.set(key, String(value));
       }
@@ -156,9 +153,10 @@ export class GenkitController {
     const webRequest = new Request(url, {
       method: req.method,
       headers,
-      body: req.method !== 'GET' && req.method !== 'HEAD'
-        ? JSON.stringify(req.body)
-        : undefined,
+      body:
+        req.method !== 'GET' && req.method !== 'HEAD'
+          ? JSON.stringify(req.body)
+          : undefined,
     });
 
     const webResponse = await handleFlow(webRequest);

@@ -100,7 +100,6 @@ func main() {
 
 	g := genkit.Init(ctx,
 		genkit.WithPlugins(&googlegenai.GoogleAI{}),
-		genkit.WithDefaultModel("googleai/gemini-2.5-flash"),
 	)
 
 	recipeGeneratorFlow := genkit.DefineFlow(g, "recipeGeneratorFlow", func(ctx context.Context, input *RecipeInput) (*Recipe, error) {
@@ -113,7 +112,10 @@ func main() {
 			Main ingredient: %s
 			Dietary restrictions: %s`, input.Ingredient, dietaryRestrictions)
 
-		recipe, _, err := genkit.GenerateData[Recipe](ctx, g, ai.WithPrompt(prompt))
+		recipe, _, err := genkit.GenerateData[Recipe](ctx, g,
+			ai.WithModelName("googleai/gemini-flash-latest"),
+			ai.WithPrompt(prompt),
+		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate recipe: %w", err)
 		}

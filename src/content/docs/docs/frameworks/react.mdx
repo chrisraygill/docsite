@@ -65,7 +65,10 @@ function App() {
       <h1>Recipe generator</h1>
       <label>
         Ingredient
-        <input value={ingredient} onChange={(e) => setIngredient(e.target.value)} />
+        <input
+          value={ingredient}
+          onChange={(e) => setIngredient(e.target.value)}
+        />
       </label>
       <label>
         Dietary restrictions

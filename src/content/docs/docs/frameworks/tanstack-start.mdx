@@ -30,65 +30,6 @@ cd my-genkit-tanstack
 npm install
 ```
 
-<Lang lang="go dart python">
-
-## Connect to a standalone backend
-
-Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
-
-1. **Set up your backend** — follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
-2. **Call flows from TanStack Start** — use `runFlow` from the Genkit client library in your React components, pointing to your backend's URL.
-
-### Install the client library
-
-```bash
-npm install genkit
-```
-
-### Call a flow
-
-```tsx title="app/routes/index.tsx"
-import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
-import { runFlow } from 'genkit/beta/client';
-
-export const Route = createFileRoute('/')({
-  component: Home,
-});
-
-function Home() {
-  const [ingredient, setIngredient] = useState('avocado');
-  const [dietaryRestrictions, setDietaryRestrictions] = useState('vegetarian');
-  const [recipe, setRecipe] = useState<any>(null);
-
-  async function generateRecipe() {
-    const result = await runFlow({
-      url: 'http://localhost:3000/recipeGeneratorFlow',
-      input: { ingredient, dietaryRestrictions },
-    });
-
-    setRecipe(result);
-  }
-
-  return (
-    <main>
-      <h1>Recipe generator</h1>
-      <input value={ingredient} onChange={(e) => setIngredient(e.target.value)} />
-      <input
-        value={dietaryRestrictions}
-        onChange={(e) => setDietaryRestrictions(e.target.value)}
-      />
-      <button onClick={generateRecipe}>Generate recipe</button>
-      {recipe && <pre>{JSON.stringify(recipe, null, 2)}</pre>}
-    </main>
-  );
-}
-```
-
-Replace `http://localhost:3000` with your backend's address. See the [Web client](/docs/frontend/web-client) guide for streaming and advanced patterns.
-
-</Lang>
-
 <Lang lang="js">
 
 ## Project layout
@@ -141,7 +82,7 @@ import { genkit, z } from 'genkit';
 
 const ai = genkit({
   plugins: [googleAI()],
-  model: googleAI.model('gemini-2.5-flash', {
+  model: googleAI.model('gemini-flash-latest', {
     temperature: 0.8,
   }),
 });
@@ -201,9 +142,7 @@ const handleFlow = fetchHandlers(
   '/api/recipeGeneratorFlow',
 );
 
-export const APIRoute = createAPIFileRoute(
-  '/api/recipeGeneratorFlow/$',
-)({
+export const APIRoute = createAPIFileRoute('/api/recipeGeneratorFlow/$')({
   POST: async ({ request }) => {
     return handleFlow(request);
   },
@@ -242,7 +181,10 @@ function Home() {
   return (
     <main>
       <h1>Recipe generator</h1>
-      <input value={ingredient} onChange={(e) => setIngredient(e.target.value)} />
+      <input
+        value={ingredient}
+        onChange={(e) => setIngredient(e.target.value)}
+      />
       <input
         value={dietaryRestrictions}
         onChange={(e) => setDietaryRestrictions(e.target.value)}
@@ -332,6 +274,68 @@ In the Developer UI:
      run a Genkit flow in the Developer UI, showing the recipe generator flow
      with input parameters and the resulting structured output.
    </video>
+
+</Lang>
+
+<Lang lang="go dart python">
+
+## Connect to a standalone backend
+
+Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
+
+1. **Set up your backend** — follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
+2. **Call flows from TanStack Start** — use `runFlow` from the Genkit client library in your React components, pointing to your backend's URL.
+
+### Install the client library
+
+```bash
+npm install genkit
+```
+
+### Call a flow
+
+```tsx title="app/routes/index.tsx"
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+import { runFlow } from 'genkit/beta/client';
+
+export const Route = createFileRoute('/')({
+  component: Home,
+});
+
+function Home() {
+  const [ingredient, setIngredient] = useState('avocado');
+  const [dietaryRestrictions, setDietaryRestrictions] = useState('vegetarian');
+  const [recipe, setRecipe] = useState<any>(null);
+
+  async function generateRecipe() {
+    const result = await runFlow({
+      url: 'http://localhost:3000/recipeGeneratorFlow',
+      input: { ingredient, dietaryRestrictions },
+    });
+
+    setRecipe(result);
+  }
+
+  return (
+    <main>
+      <h1>Recipe generator</h1>
+      <input
+        value={ingredient}
+        onChange={(e) => setIngredient(e.target.value)}
+      />
+      <input
+        value={dietaryRestrictions}
+        onChange={(e) => setDietaryRestrictions(e.target.value)}
+      />
+      <button onClick={generateRecipe}>Generate recipe</button>
+      {recipe && <pre>{JSON.stringify(recipe, null, 2)}</pre>}
+    </main>
+  );
+}
+```
+
+Replace `http://localhost:3000` with your backend's address. See the [Web client](/docs/frontend/web-client) guide for streaming and advanced patterns.
 
 </Lang>
 
