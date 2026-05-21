@@ -176,7 +176,7 @@ export class AppComponent {
 
 Update `src/app/app.component.html`:
 
-```html title="src/app/app.component.html"
+```angular title="src/app/app.component.html"
 <main>
   <h1>Recipe generator</h1>
   <input
@@ -344,7 +344,7 @@ export class AppComponent {
 }
 ```
 
-```html title="src/app/app.component.html"
+```angular title="src/app/app.component.html"
 <main>
   <h1>Recipe generator</h1>
   <input
@@ -360,7 +360,7 @@ export class AppComponent {
   <button (click)="generateRecipe()">Generate recipe</button>
 
   @if (recipe()) {
-  <pre>{{ recipe() | json }}</pre>
+    <pre>{{ recipe() | json }}</pre>
   }
 </main>
 ```
