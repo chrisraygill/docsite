@@ -142,29 +142,7 @@ const handleFlow = fetchHandlers(
 
 export default defineEventHandler(async (event) => {
   const request = toWebRequest(event);
-  const response = await handleFlow(request);
-
-  // Copy the Web Response back into Nitro's event response
-  event.node.res.statusCode = response.status;
-  response.headers.forEach((value, key) => {
-    event.node.res.setHeader(key, value);
-  });
-
-  if (response.body) {
-    const reader = response.body.getReader();
-    const push = async () => {
-      const { done, value } = await reader.read();
-      if (done) {
-        event.node.res.end();
-        return;
-      }
-      event.node.res.write(value);
-      await push();
-    };
-    await push();
-  } else {
-    event.node.res.end();
-  }
+  return await handleFlow(request);
 });
 ```
 

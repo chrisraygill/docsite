@@ -133,7 +133,7 @@ export const recipeGeneratorFlow = ai.defineFlow(
 Create `app/routes/api/recipeGeneratorFlow/[...path].ts` to expose the flow using Genkit's fetch handler:
 
 ```ts title="app/routes/api/recipeGeneratorFlow/[...path].ts"
-import { createAPIFileRoute } from '@tanstack/react-start/api';
+import { createAPIFileRoute } from '@tanstack/start/api';
 import { recipeGeneratorFlow } from '~/genkit/recipeGeneratorFlow';
 import { fetchHandlers } from '@genkit-ai/fetch';
 

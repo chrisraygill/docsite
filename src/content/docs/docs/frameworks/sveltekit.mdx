@@ -159,9 +159,9 @@ Update `src/routes/+page.svelte`:
 <script lang="ts">
   import { runFlow } from 'genkit/beta/client';
 
-  let ingredient = 'avocado';
-  let dietaryRestrictions = 'vegetarian';
-  let recipe: any = null;
+  let ingredient = $state('avocado');
+  let dietaryRestrictions = $state('vegetarian');
+  let recipe = $state<any>(null);
 
   async function generateRecipe() {
     recipe = await runFlow({
@@ -181,7 +181,7 @@ Update `src/routes/+page.svelte`:
     Dietary restrictions
     <input bind:value={dietaryRestrictions} />
   </label>
-  <button on:click={generateRecipe}>Generate recipe</button>
+  <button onclick={generateRecipe}>Generate recipe</button>
   {#if recipe}
     <pre>{JSON.stringify(recipe, null, 2)}</pre>
   {/if}
@@ -290,9 +290,9 @@ npm install genkit
 <script lang="ts">
   import { runFlow } from 'genkit/beta/client';
 
-  let ingredient = 'avocado';
-  let dietaryRestrictions = 'vegetarian';
-  let recipe: any = null;
+  let ingredient = $state('avocado');
+  let dietaryRestrictions = $state('vegetarian');
+  let recipe = $state<any>(null);
 
   async function generateRecipe() {
     recipe = await runFlow({
@@ -312,7 +312,7 @@ npm install genkit
     Dietary restrictions
     <input bind:value={dietaryRestrictions} />
   </label>
-  <button on:click={generateRecipe}>Generate recipe</button>
+  <button onclick={generateRecipe}>Generate recipe</button>
   {#if recipe}
     <pre>{JSON.stringify(recipe, null, 2)}</pre>
   {/if}

@@ -148,11 +148,12 @@ Update `src/app/app.component.ts`:
 ```ts title="src/app/app.component.ts"
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { JsonPipe } from '@angular/common';
 import { runFlow } from 'genkit/beta/client';
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule],
+  imports: [FormsModule, JsonPipe],
   templateUrl: './app.component.html',
 })
 export class AppComponent {
@@ -318,11 +319,12 @@ npm install genkit
 ```ts title="src/app/app.component.ts"
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { JsonPipe } from '@angular/common';
 import { runFlow } from 'genkit/beta/client';
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule],
+  imports: [FormsModule, JsonPipe],
   templateUrl: './app.component.html',
 })
 export class AppComponent {
