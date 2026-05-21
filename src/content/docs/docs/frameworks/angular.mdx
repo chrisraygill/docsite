@@ -11,7 +11,17 @@ supportedLanguages:
 import { FileTree } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 
-Use this guide when you're starting from an Angular app and want a practical Genkit setup with a server route and frontend call. You can either define Genkit flows directly in Angular SSR server routes, or connect your Angular frontend to a standalone Genkit backend written in any language.
+<Lang lang="js">
+
+Use this guide when you're starting from an Angular app and want a practical Genkit setup. You will define Genkit flows directly in Angular SSR server routes.
+
+</Lang>
+
+<Lang lang="go dart python">
+
+Use this guide when you're starting from an Angular app and want a practical Genkit setup. You will connect your Angular frontend to a standalone Genkit backend.
+
+</Lang>
 
 ## Before you begin
 
@@ -23,15 +33,24 @@ This guide assumes you're already familiar with building Angular applications.
 
 ## Create a project
 
+If you don't already have an Angular project, create one:
+
 <Lang lang="js">
 
 This path uses Angular with SSR and server routing so Genkit can run server-side:
 
 ```bash
-ng new --ssr --server-routing
+ng new --ssr --server-routing my-genkit-angular
+cd my-genkit-angular
 ```
 
-## Project layout
+## Expose flows via Angular SSR
+
+With Angular SSR, you can define and expose your Genkit flows directly inside your server routes.
+
+### Project layout
+
+Your Angular project structure should look like this:
 
 <FileTree>
 
@@ -46,7 +65,7 @@ ng new --ssr --server-routing
 
 </FileTree>
 
-## Install Genkit packages
+### Install Genkit packages
 
 Install the Genkit CLI globally:
 
@@ -61,7 +80,7 @@ npm install genkit @genkit-ai/google-genai @genkit-ai/express
 npm install -D tsx
 ```
 
-## Configure your model API key
+### Configure your model API key
 
 This guide uses the Gemini API from Google AI Studio.
 
@@ -69,7 +88,7 @@ This guide uses the Gemini API from Google AI Studio.
 export GEMINI_API_KEY=<your API key>
 ```
 
-## Define your recipe flow
+### Define your recipe flow
 
 Create `src/genkit/recipeGeneratorFlow.ts`:
 
@@ -125,7 +144,7 @@ export const recipeGeneratorFlow = ai.defineFlow(
 );
 ```
 
-## Add a server route
+### Add a server route
 
 In `src/server.ts`, add:
 
@@ -141,7 +160,39 @@ app.use(express.json());
 app.post('/api/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
 ```
 
-## Call your flow from Angular
+</Lang>
+
+<Lang lang="go dart python">
+
+Create a standard client-side Angular project:
+
+```bash
+ng new my-genkit-angular
+cd my-genkit-angular
+```
+
+## Connect to a standalone backend
+
+Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
+
+1. **Set up your backend** — follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
+2. **Call flows from Angular** — use the Genkit client library in your Angular components to call the flow's absolute URL.
+
+### Install the client library
+
+In your Angular project directory, install the client library:
+
+```bash
+npm install genkit
+```
+
+</Lang>
+
+## Call your flow from the frontend
+
+Whether running with Angular SSR or connecting to a standalone backend, you can call the flow endpoint from your Angular components using the Genkit client library.
+
+### 1. Update the component class
 
 Update `src/app/app.component.ts`:
 
@@ -163,6 +214,8 @@ export class AppComponent {
 
   async generateRecipe() {
     const result = await runFlow({
+      // For JS SSR, use relative URL: '/api/recipeGeneratorFlow'
+      // For standalone backends, use absolute URL: 'http://localhost:3000/recipeGeneratorFlow'
       url: '/api/recipeGeneratorFlow',
       input: {
         ingredient: this.ingredient(),
@@ -174,6 +227,8 @@ export class AppComponent {
   }
 }
 ```
+
+### 2. Update the component template
 
 Update `src/app/app.component.html`:
 
@@ -200,7 +255,9 @@ Update `src/app/app.component.html`:
 
 ## Run your application
 
-Run your app locally as normal:
+<Lang lang="js">
+
+Run your Angular SSR application locally:
 
 ```bash
 npm start
@@ -214,13 +271,15 @@ genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
 
 ## Test your flow
 
-You can test the route directly:
+With your application running, you can test the route directly over HTTP:
 
 ```bash
 curl -X POST http://localhost:4200/api/recipeGeneratorFlow \
   -H "Content-Type: application/json" \
   -d '{"data":{"ingredient":"avocado","dietaryRestrictions":"vegetarian"}}'
 ```
+
+You should receive a structured recipe in the response.
 
 ## Test in the Developer UI
 
@@ -295,79 +354,13 @@ In the Developer UI:
 
 <Lang lang="go dart python">
 
-Create a standard Angular project:
+Run your Angular client application locally:
 
 ```bash
-ng new
+npm start
 ```
 
-## Connect to a standalone backend
-
-Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
-
-1. **Set up your backend** — follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
-2. **Call flows from Angular** — use `runFlow` from the Genkit client library in your Angular components, pointing to your backend's URL.
-
-### Install the client library
-
-```bash
-npm install genkit
-```
-
-### Call a flow
-
-```ts title="src/app/app.component.ts"
-import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { JsonPipe } from '@angular/common';
-import { runFlow } from 'genkit/beta/client';
-
-@Component({
-  selector: 'app-root',
-  imports: [FormsModule, JsonPipe],
-  templateUrl: './app.component.html',
-})
-export class AppComponent {
-  ingredient = signal('avocado');
-  dietaryRestrictions = signal('vegetarian');
-  recipe = signal<any | null>(null);
-
-  async generateRecipe() {
-    const result = await runFlow({
-      url: 'http://localhost:3000/recipeGeneratorFlow',
-      input: {
-        ingredient: this.ingredient(),
-        dietaryRestrictions: this.dietaryRestrictions(),
-      },
-    });
-
-    this.recipe.set(result);
-  }
-}
-```
-
-```angular title="src/app/app.component.html"
-<main>
-  <h1>Recipe generator</h1>
-  <input
-    [ngModel]="ingredient()"
-    (ngModelChange)="ingredient.set($event)"
-    placeholder="Ingredient"
-  />
-  <input
-    [ngModel]="dietaryRestrictions()"
-    (ngModelChange)="dietaryRestrictions.set($event)"
-    placeholder="Dietary restrictions"
-  />
-  <button (click)="generateRecipe()">Generate recipe</button>
-
-  @if (recipe()) {
-    <pre>{{ recipe() | json }}</pre>
-  }
-</main>
-```
-
-Replace `http://localhost:3000` with your backend's address. See the [Web client](/docs/frontend/web-client) guide for streaming and advanced patterns.
+Make sure your standalone backend server is also running so the Angular app can reach the flow endpoint.
 
 </Lang>
 
