@@ -220,6 +220,10 @@ export class AppComponent {
 
 This component uses Angular **Signals** to manage the form input states reactively. The `generateRecipe()` method calls the flow endpoint using Genkit's `runFlow` client helper and stores the resulting recipe.
 
+:::important[Enable CORS on standalone backends]
+If you are using a standalone backend, enable CORS on your backend server or the browser will block requests from the Angular application.
+:::
+
 ### Component template
 
 Replace the contents of `src/app/app.component.html` with the following:
