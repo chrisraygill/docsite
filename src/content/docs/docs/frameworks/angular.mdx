@@ -8,36 +8,32 @@ supportedLanguages:
   - python
 ---
 
-import { FileTree } from '@astrojs/starlight/components';
+import { FileTree, LinkButton } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 
 <Lang lang="js">
 
-Use this guide when you're starting from an Angular app and want a practical Genkit setup. You will define Genkit flows directly in Angular SSR server routes.
+Use this guide to add Genkit to an Angular application by running Genkit server-side inside Angular SSR server routes.
 
 </Lang>
 
 <Lang lang="go dart python">
 
-Use this guide when you're starting from an Angular app and want a practical Genkit setup. You will connect your Angular frontend to a standalone Genkit backend.
+Use this guide to connect your Angular frontend application to a standalone Genkit backend.
 
 </Lang>
 
-## Before you begin
+## Prerequisites
 
 - Node.js v20 or later
 - npm
 - Angular CLI
 
-This guide assumes you're already familiar with building Angular applications.
-
 ## Create a project
 
-If you don't already have an Angular project, create one:
+If you don't have an Angular project, create one:
 
 <Lang lang="js">
-
-This path uses Angular with SSR and server routing so Genkit can run server-side:
 
 ```bash
 ng new --ssr --server-routing my-genkit-angular
@@ -46,11 +42,9 @@ cd my-genkit-angular
 
 ## Expose flows via Angular SSR
 
-With Angular SSR, you can define and expose your Genkit flows directly inside your server routes.
-
 ### Project layout
 
-Your Angular project structure should look like this:
+Create the files shown in bold:
 
 <FileTree>
 
@@ -67,22 +61,26 @@ Your Angular project structure should look like this:
 
 ### Install Genkit packages
 
-Install the Genkit CLI globally:
-
 ```bash
 npm install -g genkit-cli
-```
-
-Then install the packages you need in your project:
-
-```bash
 npm install genkit @genkit-ai/google-genai @genkit-ai/express
 npm install -D tsx
 ```
 
 ### Configure your model API key
 
-This guide uses the Gemini API from Google AI Studio.
+This guide uses the Gemini API, which requires an API key from Google AI Studio:
+
+<LinkButton
+  href="https://aistudio.google.com/apikey"
+  icon="external"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Get a Gemini API Key
+</LinkButton>
+
+Set the `GEMINI_API_KEY` environment variable to your key:
 
 ```bash
 export GEMINI_API_KEY=<your API key>
@@ -146,7 +144,7 @@ export const recipeGeneratorFlow = ai.defineFlow(
 
 ### Add a server route
 
-In `src/server.ts`, add:
+Register the flow handler in `src/server.ts`:
 
 ```ts title="src/server.ts"
 import { expressHandler } from '@genkit-ai/express';
@@ -164,8 +162,6 @@ app.post('/api/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
 
 <Lang lang="go dart python">
 
-Create a standard client-side Angular project:
-
 ```bash
 ng new my-genkit-angular
 cd my-genkit-angular
@@ -173,28 +169,20 @@ cd my-genkit-angular
 
 ## Connect to a standalone backend
 
-Since your Genkit backend uses a different language, you'll set up the backend and frontend separately:
+1. **Set up your backend**: Expose your flow as an HTTP endpoint by following a [server integration guide](/docs/frameworks/overview) in your preferred language.
+2. **Install the client library**:
 
-1. **Set up your backend** — follow a [server integration guide](/docs/frameworks/overview) for your language to create a Genkit server that exposes flows as HTTP endpoints.
-2. **Call flows from Angular** — use the Genkit client library in your Angular components to call the flow's absolute URL.
-
-### Install the client library
-
-In your Angular project directory, install the client library:
-
-```bash
-npm install genkit
-```
+   ```bash
+   npm install genkit
+   ```
 
 </Lang>
 
-## Call your flow from the frontend
+## Call your flow from the component
 
-Whether running with Angular SSR or connecting to a standalone backend, you can call the flow endpoint from your Angular components using the Genkit client library.
+Whether using Angular SSR or a standalone backend, update your component to call the flow endpoint:
 
-### 1. Update the component class
-
-Update `src/app/app.component.ts`:
+### Component class (`src/app/app.component.ts`)
 
 ```ts title="src/app/app.component.ts"
 import { Component, signal } from '@angular/core';
@@ -228,9 +216,7 @@ export class AppComponent {
 }
 ```
 
-### 2. Update the component template
-
-Update `src/app/app.component.html`:
+### Component template (`src/app/app.component.html`)
 
 ```angular title="src/app/app.component.html"
 <main>
@@ -255,23 +241,17 @@ Update `src/app/app.component.html`:
 
 ## Run your application
 
-<Lang lang="js">
-
-Run your Angular SSR application locally:
+Start your Angular application locally:
 
 ```bash
 npm start
 ```
 
-You can also launch the Developer UI alongside your flow code:
-
-```bash
-genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
-```
+<Lang lang="js">
 
 ## Test your flow
 
-With your application running, you can test the route directly over HTTP:
+Test the endpoint directly:
 
 ```bash
 curl -X POST http://localhost:4200/api/recipeGeneratorFlow \
@@ -283,27 +263,16 @@ You should receive a structured recipe in the response.
 
 ## Test in the Developer UI
 
-The **Developer UI** is a local tool for testing and inspecting Genkit components, like flows, with a visual interface.
-
-### Start the Developer UI
-
-The Genkit CLI is required to run the Developer UI. If you followed the installation steps above, you already have it installed.
-
-Run the following command from your project root:
+Start the Developer UI from your project root:
 
 ```bash
 genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
 ```
 
-This starts your app and launches the Developer UI at `http://localhost:4000` by default.
+This launches the Developer UI at `http://localhost:4000` by default.
 
-:::note
-The command after `--` should run the file that defines or imports your Genkit components. You can use `tsx`, `node`, or other commands based on your setup. Learn more in [developer tools](/docs/devtools).
-:::
-
-##### Optional: Add an npm script
-
-To make starting the Developer UI easier, add the following to your `package.json` scripts:
+:::tip[Add an npm script]
+To make starting the Developer UI easier, add this to your `package.json` scripts:
 
 ```json
 "scripts": {
@@ -311,11 +280,8 @@ To make starting the Developer UI easier, add the following to your `package.jso
 }
 ```
 
-Then run it with:
-
-```bash
-npm run genkit:ui
-```
+Then run: `npm run genkit:ui`
+:::
 
 ### Run and inspect flows
 
@@ -354,13 +320,7 @@ In the Developer UI:
 
 <Lang lang="go dart python">
 
-Run your Angular client application locally:
-
-```bash
-npm start
-```
-
-Make sure your standalone backend server is also running so the Angular app can reach the flow endpoint.
+Make sure your standalone backend server is also running.
 
 </Lang>
 
