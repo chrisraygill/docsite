@@ -98,9 +98,8 @@ Your project structure should look like this:
 ### Install Genkit packages
 
 ```bash
-npm install -g genkit-cli
 npm install genkit @genkit-ai/google-genai @genkit-ai/express
-npm install -D tsx
+npm install -D genkit-cli tsx
 ```
 
 ### Configure your model API key
@@ -331,7 +330,7 @@ You should receive a structured recipe in the response.
 Start the Developer UI from your project root:
 
 ```bash
-genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
+npx genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
 ```
 
 This launches the Developer UI at `http://localhost:4000` by default.
