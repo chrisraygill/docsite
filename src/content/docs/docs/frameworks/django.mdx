@@ -153,9 +153,13 @@ async def recipe_generator_flow(input_data: RecipeInput) -> Recipe:
     return result.output
 
 
+class GenkitRequest(Schema):
+    data: RecipeInput
+
+
 @api.post('/recipeGeneratorFlow')
-async def recipe_generator_endpoint(request, data: RecipeInput):
-    result = await recipe_generator_flow(data)
+async def recipe_generator_endpoint(request, payload: GenkitRequest):
+    result = await recipe_generator_flow(payload.data)
     return {'result': result.model_dump()}
 ```
 

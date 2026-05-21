@@ -191,7 +191,7 @@ export const recipeGeneratorFlow = ai.defineFlow(
 Create `app/routes/api.recipeGeneratorFlow.$.ts` to expose the flow using Genkit's fetch handler:
 
 ```ts title="app/routes/api.recipeGeneratorFlow.$.ts"
-import type { ActionFunctionArgs } from '@remix-run/node';
+import type { ActionFunctionArgs } from 'react-router';
 import { recipeGeneratorFlow } from '~/genkit/recipeGeneratorFlow';
 import { fetchHandlers } from '@genkit-ai/fetch';
 

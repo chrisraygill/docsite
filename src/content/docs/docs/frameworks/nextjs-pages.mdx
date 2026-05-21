@@ -129,88 +129,172 @@ This gives you a smooth upgrade path:
 
 </FileTree>
 
-## Define your flows
+## Install Genkit packages
 
-Create a shared flow module, for example `src/genkit/menuSuggestionFlow.ts`:
+Install the Genkit CLI globally:
 
-```ts title="src/genkit/menuSuggestionFlow.ts"
-import { googleAI } from '@genkit-ai/google-genai';
-import { genkit, z } from 'genkit';
-
-const ai = genkit({
-  plugins: [googleAI()],
-  model: googleAI.model('gemini-2.5-flash'),
-});
-
-export const menuSuggestionFlow = ai.defineFlow(
-  {
-    name: 'menuSuggestionFlow',
-    inputSchema: z.object({ theme: z.string() }),
-    outputSchema: z.object({ menuItem: z.string() }),
-  },
-  async ({ theme }) => {
-    const { text } = await ai.generate({
-      prompt: `Invent a menu item for a ${theme} themed restaurant.`,
-    });
-    return { menuItem: text };
-  },
-);
+```bash
+npm install -g genkit-cli
 ```
 
-## Expose the flows from a backend
+Then install the packages you need in your project:
 
-Choose one of these guides to expose the flow over HTTP:
-
-- [Express](/docs/frameworks/express) if you want a familiar Node.js server
-- [Hono](/docs/frameworks/hono) if you want a lightweight fetch-based server that can target multiple runtimes
-
-Once that backend is running, your Next.js app can call it like any other API.
-
-## Call flows from your Pages Router frontend
-
-From a client component or page-level interaction, use the generic Genkit client:
-
-```tsx title="src/pages/index.tsx"
-import { runFlow } from 'genkit/beta/client';
-
-async function getMenuItem(theme: string) {
-  const result = await runFlow({
-    url: 'http://localhost:8080/menuSuggestionFlow',
-    input: { theme },
-  });
-
-  return result.menuItem;
-}
+```bash
+npm install genkit @genkit-ai/google-genai @genkit-ai/express
+npm install -D tsx
 ```
 
-If you're exposing the flow from Hono using the fetch plugin, the URL would look more like:
+## Configure your model API key
 
-```ts title="src/pages/index.tsx"
-const result = await runFlow({
-  url: 'http://localhost:3780/api/menuSuggestionFlow',
-  input: { theme },
-});
-```
-
-## Run and test locally
-
-Before running your app, configure the Google AI Gemini API:
+This guide uses the Gemini API from Google AI Studio.
 
 ```bash
 export GEMINI_API_KEY=<your API key>
 ```
 
-Then run:
+## Define your recipe flow
 
-- your Next.js app with `npm run dev`
-- your Genkit backend using the framework guide you chose
-- the Genkit Developer UI against your flow module or backend command
+Create `src/genkit/recipeGeneratorFlow.ts`:
 
-For example:
+```ts title="src/genkit/recipeGeneratorFlow.ts"
+import { googleAI } from '@genkit-ai/google-genai';
+import { genkit, z } from 'genkit';
+
+const ai = genkit({
+  plugins: [googleAI()],
+  model: googleAI.model('gemini-2.5-flash', {
+    temperature: 0.8,
+  }),
+});
+
+const RecipeInputSchema = z.object({
+  ingredient: z.string().describe('Main ingredient or cuisine type'),
+  dietaryRestrictions: z
+    .string()
+    .optional()
+    .describe('Any dietary restrictions'),
+});
+
+const RecipeSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  prepTime: z.string(),
+  cookTime: z.string(),
+  servings: z.number(),
+  ingredients: z.array(z.string()),
+  instructions: z.array(z.string()),
+  tips: z.array(z.string()).optional(),
+});
+
+export const recipeGeneratorFlow = ai.defineFlow(
+  {
+    name: 'recipeGeneratorFlow',
+    inputSchema: RecipeInputSchema,
+    outputSchema: RecipeSchema,
+  },
+  async (input) => {
+    const prompt = `Create a recipe with the following requirements:
+      Main ingredient: ${input.ingredient}
+      Dietary restrictions: ${input.dietaryRestrictions || 'none'}`;
+
+    const { output } = await ai.generate({
+      prompt,
+      output: { schema: RecipeSchema },
+    });
+
+    if (!output) throw new Error('Failed to generate recipe');
+    return output;
+  },
+);
+```
+
+## Expose the flow from a companion server
+
+Create `src/server/index.ts` to expose the flow using Express:
+
+```ts title="src/server/index.ts"
+import express from 'express';
+import { expressHandler } from '@genkit-ai/express';
+import { recipeGeneratorFlow } from '../genkit/recipeGeneratorFlow';
+
+const app = express();
+app.use(express.json());
+
+app.post('/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
+
+app.listen(8080, () => {
+  console.log('Genkit server listening on http://localhost:8080');
+});
+```
+
+You can also choose [Hono](/docs/frameworks/hono) if you want a lightweight fetch-based server that can target multiple runtimes.
+
+## Call your flow from the frontend
+
+Update `src/pages/index.tsx`:
+
+```tsx title="src/pages/index.tsx"
+import { useState } from 'react';
+import { runFlow } from 'genkit/beta/client';
+
+export default function Home() {
+  const [ingredient, setIngredient] = useState('avocado');
+  const [dietaryRestrictions, setDietaryRestrictions] = useState('vegetarian');
+  const [recipe, setRecipe] = useState<any>(null);
+
+  async function generateRecipe() {
+    const result = await runFlow({
+      url: 'http://localhost:8080/recipeGeneratorFlow',
+      input: { ingredient, dietaryRestrictions },
+    });
+
+    setRecipe(result);
+  }
+
+  return (
+    <main>
+      <h1>Recipe generator</h1>
+      <input value={ingredient} onChange={(e) => setIngredient(e.target.value)} />
+      <input
+        value={dietaryRestrictions}
+        onChange={(e) => setDietaryRestrictions(e.target.value)}
+      />
+      <button onClick={generateRecipe}>Generate recipe</button>
+      {recipe && <pre>{JSON.stringify(recipe, null, 2)}</pre>}
+    </main>
+  );
+}
+```
+
+## Run your application
+
+Start the Next.js app and the companion server separately:
 
 ```bash
-genkit start -- npx tsx --watch src/genkit/menuSuggestionFlow.ts
+# Terminal 1: Start the Next.js frontend
+npm run dev
+
+# Terminal 2: Start the Genkit companion server
+npx tsx src/server/index.ts
 ```
+
+You can also launch the Developer UI alongside your flow code:
+
+```bash
+genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
+```
+
+## Test your flow
+
+With the companion server running, call your flow over HTTP:
+
+```bash
+curl -X POST http://localhost:8080/recipeGeneratorFlow \
+  -H "Content-Type: application/json" \
+  -d '{"data":{"ingredient":"avocado","dietaryRestrictions":"vegetarian"}}'
+```
+
+You should receive a structured recipe in the response.
 
 ## Test in the Developer UI
 
@@ -223,7 +307,7 @@ The Genkit CLI is required to run the Developer UI. If you followed the installa
 Run the following command from your project root:
 
 ```bash
-genkit start -- npx tsx --watch src/genkit/menuSuggestionFlow.ts
+genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
 ```
 
 This starts your app and launches the Developer UI at `http://localhost:4000` by default.
@@ -238,7 +322,7 @@ To make starting the Developer UI easier, add the following to your `package.jso
 
 ```json
 "scripts": {
-  "genkit:ui": "genkit start -- npx tsx --watch src/genkit/menuSuggestionFlow.ts"
+  "genkit:ui": "genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts"
 }
 ```
 
@@ -252,18 +336,19 @@ npm run genkit:ui
 
 In the Developer UI:
 
-1. Select `menuSuggestionFlow` from the list of flows.
+1. Select `recipeGeneratorFlow` from the list of flows.
 2. Enter sample input:
 
    ```json
    {
-     "theme": "Italian vegetarian"
+     "ingredient": "avocado",
+     "dietaryRestrictions": "vegetarian"
    }
    ```
 
 3. Click **Run**
 
-   You'll see the generated output, along with a visual trace of the AI generation process for debugging and optimization.
+   You'll see the generated recipe as structured output, along with a visual trace of the AI generation process for debugging and optimization.
 
    <video
      controls

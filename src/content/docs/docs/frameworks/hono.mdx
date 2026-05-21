@@ -50,8 +50,7 @@ npm install -g genkit-cli
 Then install the packages you need in your project:
 
 ```bash
-npm install genkit @genkit-ai/google-genai @genkit-ai/fetch hono
-npm install -D @hono/node-server
+npm install genkit @genkit-ai/google-genai @genkit-ai/fetch hono @hono/node-server
 ```
 
 ## Configure your model API key
@@ -68,7 +67,7 @@ Update `src/index.ts` with the same recipe flow used in the main quickstart, the
 
 ```ts title="src/index.ts"
 import { serve } from '@hono/node-server';
-import { handleFlows } from '@genkit-ai/fetch';
+import { fetchHandlers } from '@genkit-ai/fetch';
 import { googleAI } from '@genkit-ai/google-genai';
 import { genkit, z } from 'genkit';
 import { Hono } from 'hono';
@@ -121,10 +120,10 @@ const recipeGeneratorFlow = ai.defineFlow(
 );
 
 const app = new Hono();
-const flows = [recipeGeneratorFlow];
+const handleFlow = fetchHandlers([recipeGeneratorFlow], '/api');
 
 app.post('/api/:flowName', async (c) => {
-  return handleFlows(c.req.raw, flows, '/api/');
+  return handleFlow(c.req.raw);
 });
 
 serve(
