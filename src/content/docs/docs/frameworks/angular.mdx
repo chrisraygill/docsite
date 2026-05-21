@@ -8,18 +8,29 @@ supportedLanguages:
   - python
 ---
 
-import { FileTree, LinkButton } from '@astrojs/starlight/components';
+import {
+
+FileTree,
+LinkButton,
+Tabs,
+TabItem,
+} from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
+
+Use this guide to add Genkit to an Angular application.
 
 <Lang lang="js">
 
-Use this guide to add Genkit to an Angular application by running Genkit server-side inside Angular SSR server routes.
+You can integrate Genkit in two ways:
+
+- **Angular SSR**: Run Genkit server-side directly inside Angular SSR server routes.
+- **Standalone backend**: Connect your Angular frontend to a standalone JS/TS backend server (e.g., Express or Hono).
 
 </Lang>
 
 <Lang lang="go dart python">
 
-Use this guide to connect your Angular frontend application to a standalone Genkit backend.
+You will connect your Angular frontend application to a standalone Genkit backend.
 
 </Lang>
 
@@ -35,12 +46,37 @@ If you don't have an Angular project, create one:
 
 <Lang lang="js">
 
+<Tabs syncKey="angular-setup">
+
+<TabItem label="Angular SSR">
+
 ```bash
 ng new --ssr --server-routing my-genkit-angular
 cd my-genkit-angular
 ```
 
-## Expose flows via Angular SSR
+</TabItem>
+
+<TabItem label="Standalone backend">
+
+```bash
+ng new my-genkit-angular
+cd my-genkit-angular
+```
+
+</TabItem>
+
+</Tabs>
+
+## Integrate Genkit with Angular
+
+Select your integration architecture:
+
+<Tabs syncKey="angular-setup">
+
+<TabItem label="Angular SSR">
+
+You will run Genkit server-side directly inside Angular SSR server routes.
 
 ### Project layout
 
@@ -147,16 +183,33 @@ export const recipeGeneratorFlow = ai.defineFlow(
 Register the flow handler in `src/server.ts`:
 
 ```ts title="src/server.ts"
+// ...
 import { expressHandler } from '@genkit-ai/express';
 import { recipeGeneratorFlow } from './genkit/recipeGeneratorFlow';
-```
 
-Then register the route after your `app` is created:
+// ...
+const app = express(); // Existing Angular SSR setup
 
-```ts
 app.use(express.json());
 app.post('/api/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
 ```
+
+</TabItem>
+
+<TabItem label="Standalone backend">
+
+You will connect your Angular frontend to a standalone Genkit server running in JavaScript (Express/Hono) or another language.
+
+1. **Set up your backend**: Expose your flow as an HTTP endpoint by following a [server integration guide](/docs/frameworks/overview) in your preferred backend framework (such as Express or Hono).
+2. **Install the Genkit client library**:
+
+   ```bash
+   npm install genkit
+   ```
+
+</TabItem>
+
+</Tabs>
 
 </Lang>
 
@@ -170,7 +223,7 @@ cd my-genkit-angular
 ## Connect to a standalone backend
 
 1. **Set up your backend**: Expose your flow as an HTTP endpoint by following a [server integration guide](/docs/frameworks/overview) in your preferred language.
-2. **Install the client library**:
+2. **Install the Genkit client library**:
 
    ```bash
    npm install genkit
@@ -220,7 +273,7 @@ export class AppComponent {
 
 This component uses Angular **Signals** to manage the form input states reactively. The `generateRecipe()` method calls the flow endpoint using Genkit's `runFlow` client helper and stores the resulting recipe.
 
-:::important[Enable CORS on standalone backends]
+:::caution[Enable CORS]
 If you are using a standalone backend, enable CORS on your backend server or the browser will block requests from the Angular application.
 :::
 
@@ -330,11 +383,7 @@ In the Developer UI:
 
 </Lang>
 
-<Lang lang="go dart python">
-
-Make sure your standalone backend server is also running.
-
-</Lang>
+If you are using a standalone backend, make sure your backend server is also running.
 
 ## Learn more
 
