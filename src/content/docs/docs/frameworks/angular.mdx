@@ -44,18 +44,18 @@ cd my-genkit-angular
 
 ### Project layout
 
-Create the files shown in bold:
+Your project structure should look like this:
 
 <FileTree>
 
 - package.json
 - src
   - app
-    - **app.component.html**
-    - **app.component.ts**
+    - app.component.html
+    - app.component.ts
   - genkit
-    - **recipeGeneratorFlow.ts**
-  - **server.ts**
+    - **recipeGeneratorFlow.ts** (create this file)
+  - server.ts
 
 </FileTree>
 
@@ -178,11 +178,13 @@ cd my-genkit-angular
 
 </Lang>
 
-## Call your flow from the component
+## Call your flow from an Angular component
 
 Whether using Angular SSR or a standalone backend, update your component to call the flow endpoint:
 
-### Component class (`src/app/app.component.ts`)
+### Component class
+
+Replace the contents of `src/app/app.component.ts` with the following:
 
 ```ts title="src/app/app.component.ts"
 import { Component, signal } from '@angular/core';
@@ -216,7 +218,11 @@ export class AppComponent {
 }
 ```
 
-### Component template (`src/app/app.component.html`)
+This component uses Angular **Signals** to manage the form input states reactively. The `generateRecipe()` method calls the flow endpoint using Genkit's `runFlow` client helper and stores the resulting recipe.
+
+### Component template
+
+Replace the contents of `src/app/app.component.html` with the following:
 
 ```angular title="src/app/app.component.html"
 <main>
@@ -238,6 +244,8 @@ export class AppComponent {
   }
 </main>
 ```
+
+The template uses two-way model binding to sync the input fields with the component signals, and binds the button click to `generateRecipe()`. Angular's modern **`@if`** control flow conditionally renders the output, utilizing the built-in **`json` pipe** to format the structured recipe JSON.
 
 ## Run your application
 
@@ -324,7 +332,7 @@ Make sure your standalone backend server is also running.
 
 </Lang>
 
-## Next steps
+## Learn more
 
 - [Creating flows](/docs/flows)
 - [Generating content](/docs/models)
