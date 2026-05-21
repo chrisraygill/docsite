@@ -16,6 +16,7 @@ Tabs,
 TabItem,
 } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
+import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
 
 Use this guide to learn how to add AI-powered features to an Angular application with Genkit.
 
@@ -97,10 +98,12 @@ Your project structure should look like this:
 
 ### Install Genkit packages
 
-```bash
+<PackageManagerTabs
+  command={`
 npm install genkit @genkit-ai/google-genai @genkit-ai/express
 npm install -D genkit-cli tsx
-```
+`}
+/>
 
 ### Configure your model API key
 
@@ -307,9 +310,7 @@ The template uses two-way model binding to sync the input fields with the compon
 
 Start your Angular application locally:
 
-```bash
-npm start
-```
+<PackageManagerTabs command="npm start" />
 
 <Lang lang="js">
 
@@ -329,22 +330,12 @@ You should receive a structured recipe in the response.
 
 Start the Developer UI from your project root:
 
-```bash
-npx genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
-```
+<PackageManagerTabs command="npx genkit start -- tsx --watch src/genkit/recipeGeneratorFlow.ts" />
 
 This launches the Developer UI at `http://localhost:4000` by default.
 
-:::tip[Add an npm script]
-To make starting the Developer UI easier, add this to your `package.json` scripts:
-
-```json
-"scripts": {
-  "genkit:ui": "genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts"
-}
-```
-
-Then run: `npm run genkit:ui`
+:::tip[Add a script]
+To make starting the Developer UI easier, add the above command as a script in your `package.json`.
 :::
 
 ### Run and inspect flows
