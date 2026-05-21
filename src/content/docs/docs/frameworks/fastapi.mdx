@@ -101,7 +101,7 @@ class Recipe(BaseModel):
     tips: list[str] | None = None
 
 
-@app.post('/recipeGeneratorFlow')
+@app.post('/recipeGeneratorFlow', response_model=None)
 @genkit_fastapi_handler(ai)
 @ai.flow()
 async def recipe_generator_flow(input_data: RecipeInput) -> Recipe:
