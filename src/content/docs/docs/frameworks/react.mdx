@@ -5,6 +5,7 @@ isLanguageAgnostic: true
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
+import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
 
 Use this guide when you're building a React app with Vite and want to call Genkit flows from a standalone backend.
 
@@ -21,11 +22,11 @@ This guide assumes you're already familiar with building React applications.
 
 If you don't already have a React project, create one:
 
-```bash
+<PackageManagerTabs command={`
 npm create vite@latest my-genkit-react -- --template react-ts
 cd my-genkit-react
 npm install
-```
+`} />
 
 ## Set up your backend
 
@@ -35,9 +36,7 @@ Follow a [server integration guide](/docs/frameworks/overview) for your language
 
 In your React project, install the Genkit client:
 
-```bash
-npm install genkit
-```
+<PackageManagerTabs command="npm install genkit" />
 
 ## Call a flow from React
 
@@ -92,9 +91,7 @@ Replace `http://localhost:3000` with your backend's address. See the [Web client
 
 Start the Vite dev server:
 
-```bash
-npm run dev
-```
+<PackageManagerTabs command="npm run dev" />
 
 Make sure your backend server is also running so the React app can reach the flow endpoint.
 

@@ -46,6 +46,18 @@ function convertLine(line: string, target: 'npm' | 'pnpm' | 'yarn' | 'bun'): str
     }
   }
 
+  // 1b. Parse npm create / npm init commands
+  const createRegex = /^npm\s+(create|init)\s+(.*?)$/;
+  const createMatch = trimmed.match(createRegex);
+  if (createMatch) {
+    const action = createMatch[1];
+    const args = createMatch[2];
+    if (target === 'npm') return `npm ${action} ${args}`;
+    if (target === 'pnpm') return `pnpm ${action} ${args}`;
+    if (target === 'yarn') return `yarn create ${args}`;
+    if (target === 'bun') return `bun create ${args}`;
+  }
+
   // 2. Parse and convert npx execution commands (including chained/nested npx)
   if (trimmed.startsWith('npx') || trimmed.includes(' npx')) {
     const executors = {

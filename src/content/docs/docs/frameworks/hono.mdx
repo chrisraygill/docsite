@@ -6,6 +6,7 @@ supportedLanguages:
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
+import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
 
 Use this guide when you're building with Hono and want to expose Genkit flows over HTTP using `@genkit-ai/fetch`. This pattern works well for Node.js and other fetch-based runtimes.
 
@@ -20,38 +21,22 @@ This guide assumes you're already familiar with building TypeScript server appli
 
 If you don't already have a Hono project, create one:
 
-```bash
-# Create a new Hono app with the Node.js template
+<PackageManagerTabs command={`
 npm create hono@latest my-genkit-hono -- --template nodejs --pm npm --install
-
-# Navigate to the project
 cd my-genkit-hono
-```
+`} />
 
-## Project layout
 
-<FileTree>
-
-- package.json
-- tsconfig.json
-- src
-  - **index.ts**
-
-</FileTree>
 
 ## Install Genkit packages
 
 Install the Genkit CLI globally:
 
-```bash
-npm install -g genkit-cli
-```
+<PackageManagerTabs command="npm install -g genkit-cli" />
 
 Then install the packages you need in your project:
 
-```bash
-npm install genkit @genkit-ai/google-genai @genkit-ai/fetch hono @hono/node-server
-```
+<PackageManagerTabs command="npm install genkit @genkit-ai/google-genai @genkit-ai/fetch hono @hono/node-server" />
 
 ## Configure your model API key
 
@@ -135,21 +120,29 @@ serve(
     console.log(`Hono server listening on http://localhost:${info.port}`);
   },
 );
-```
+
+## Project layout
+
+Verify that your project layout matches the structure below:
+
+<FileTree>
+
+- package.json
+- tsconfig.json
+- src
+  - **index.ts**
+
+</FileTree>
 
 ## Run your application
 
 Run your app locally:
 
-```bash
-npx tsx src/index.ts
-```
+<PackageManagerTabs command="npx tsx src/index.ts" />
 
 You can also launch it through the Developer UI:
 
-```bash
-genkit start -- npx tsx --watch src/index.ts
-```
+<PackageManagerTabs command="genkit start -- npx tsx --watch src/index.ts" />
 
 ## Test your flow
 
@@ -173,9 +166,7 @@ The Genkit CLI is required to run the Developer UI. If you followed the installa
 
 Run the following command from your project root:
 
-```bash
-genkit start -- npx tsx --watch src/index.ts
-```
+<PackageManagerTabs command="genkit start -- npx tsx --watch src/index.ts" />
 
 This starts your app and launches the Developer UI at `http://localhost:4000` by default.
 
@@ -195,9 +186,7 @@ To make starting the Developer UI easier, add the following to your `package.jso
 
 Then run it with:
 
-```bash
-npm run genkit:ui
-```
+<PackageManagerTabs command="npm run genkit:ui" />
 
 ### Run and inspect flows
 

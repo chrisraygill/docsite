@@ -10,6 +10,7 @@ supportedLanguages:
 
 import { FileTree } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
+import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
 
 Use this guide when you're starting from an Astro app with server-side rendering (SSR) and want to add Genkit flows as API endpoints alongside your Astro pages. You can either define Genkit flows directly in Astro API routes, or connect your Astro frontend to a standalone Genkit backend written in any language.
 
@@ -24,10 +25,10 @@ This guide assumes you're already familiar with building Astro applications.
 
 If you don't already have an Astro project, create one:
 
-```bash
+<PackageManagerTabs command={`
 npm create astro@latest my-genkit-astro
 cd my-genkit-astro
-```
+`} />
 
 When prompted, select the **Empty** template and enable TypeScript.
 
@@ -37,15 +38,11 @@ When prompted, select the **Empty** template and enable TypeScript.
 
 Install the Node.js adapter so your Astro app can run server-side code:
 
-```bash
-npx astro add node
-```
+<PackageManagerTabs command="npx astro add node" />
 
 This adds `@astrojs/node` and configures `astro.config.mjs` automatically. If you prefer to do it manually, install the adapter and update your config:
 
-```bash
-npm install @astrojs/node
-```
+<PackageManagerTabs command="npm install @astrojs/node" />
 
 ```ts title="astro.config.mjs"
 import { defineConfig } from 'astro/config';
@@ -59,37 +56,20 @@ export default defineConfig({
 });
 ```
 
-## Project layout
 
-<FileTree>
-
-- package.json
-- astro.config.mjs
-- src
-  - pages
-    - api
-      - recipeGeneratorFlow
-        - **\[...path\].ts**
-    - **index.astro**
-  - genkit
-    - **recipeGeneratorFlow.ts**
-
-</FileTree>
 
 ## Install Genkit packages
 
 Install the Genkit CLI globally:
 
-```bash
-npm install -g genkit-cli
-```
+<PackageManagerTabs command="npm install -g genkit-cli" />
 
 Then install the packages you need in your project:
 
-```bash
+<PackageManagerTabs command={`
 npm install genkit @genkit-ai/google-genai @genkit-ai/fetch
 npm install -D tsx
-```
+`} />
 
 ## Configure your model API key
 
@@ -220,21 +200,35 @@ Update `src/pages/index.astro`:
     </script>
   </body>
 </html>
-```
+
+## Project layout
+
+Verify that your project layout matches the structure below:
+
+<FileTree>
+
+- package.json
+- astro.config.mjs
+- src
+  - pages
+    - api
+      - recipeGeneratorFlow
+        - **\[...path\].ts**
+    - **index.astro**
+  - genkit
+    - **recipeGeneratorFlow.ts**
+
+</FileTree>
 
 ## Run your application
 
 Run your app locally:
 
-```bash
-npm run dev
-```
+<PackageManagerTabs command="npm run dev" />
 
 You can also launch the Developer UI alongside your flow code:
 
-```bash
-genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
-```
+<PackageManagerTabs command="genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts" />
 
 ## Test your flow
 
@@ -258,9 +252,7 @@ The Genkit CLI is required to run the Developer UI. If you followed the installa
 
 Run the following command from your project root:
 
-```bash
-genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
-```
+<PackageManagerTabs command="genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts" />
 
 This starts your app and launches the Developer UI at `http://localhost:4000` by default.
 
@@ -314,9 +306,7 @@ Since your Genkit backend uses a different language, you'll set up the backend a
 
 ### Install the client library
 
-```bash
-npm install genkit
-```
+<PackageManagerTabs command="npm install genkit" />
 
 ### Call a flow
 

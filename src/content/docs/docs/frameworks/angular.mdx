@@ -79,22 +79,7 @@ Select your integration architecture:
 
 You will run Genkit server-side directly inside Angular SSR server routes.
 
-### Project layout
 
-Your project structure should look like this:
-
-<FileTree>
-
-- package.json
-- src
-  - app
-    - app.component.html
-    - app.component.ts
-  - genkit
-    - **recipeGeneratorFlow.ts** (create this file)
-  - server.ts
-
-</FileTree>
 
 ### Install Genkit packages
 
@@ -195,6 +180,23 @@ const app = express(); // Existing Angular SSR setup
 app.use(express.json());
 app.post('/api/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
 ```
+
+### Project layout
+
+Verify that your project layout matches the structure below:
+
+<FileTree>
+
+- package.json
+- src
+  - app
+    - app.component.html
+    - app.component.ts
+  - genkit
+    - **recipeGeneratorFlow.ts**
+  - server.ts
+
+</FileTree>
 
 </TabItem>
 

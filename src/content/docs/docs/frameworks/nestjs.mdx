@@ -6,6 +6,7 @@ supportedLanguages:
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
+import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
 
 Use this guide when you're starting from a NestJS app and want to expose Genkit flows as HTTP endpoints.
 
@@ -20,42 +21,27 @@ This guide assumes you're already familiar with building NestJS applications.
 
 If you don't already have a NestJS project, create one:
 
-```bash
+<PackageManagerTabs command={`
 npx @nestjs/cli new my-genkit-nestjs
 cd my-genkit-nestjs
-```
+`} />
 
 When prompted, choose your preferred package manager.
 
-## Project layout
 
-<FileTree>
-
-- package.json
-- tsconfig.json
-- src
-  - **app.module.ts**
-  - main.ts
-  - genkit
-    - **recipeGeneratorFlow.ts**
-    - **genkit.controller.ts**
-
-</FileTree>
 
 ## Install Genkit packages
 
 Install the Genkit CLI globally:
 
-```bash
-npm install -g genkit-cli
-```
+<PackageManagerTabs command="npm install -g genkit-cli" />
 
 Then install the packages you need in your project:
 
-```bash
+<PackageManagerTabs command={`
 npm install genkit @genkit-ai/google-genai @genkit-ai/fetch
 npm install -D tsx
-```
+`} />
 
 ## Configure your model API key
 
@@ -188,21 +174,33 @@ import { GenkitController } from './genkit/genkit.controller';
   controllers: [GenkitController],
 })
 export class AppModule {}
-```
+
+## Project layout
+
+Verify that your project layout matches the structure below:
+
+<FileTree>
+
+- package.json
+- tsconfig.json
+- src
+  - **app.module.ts**
+  - main.ts
+  - genkit
+    - **recipeGeneratorFlow.ts**
+    - **genkit.controller.ts**
+
+</FileTree>
 
 ## Run your application
 
 Run your app locally:
 
-```bash
-npm run start:dev
-```
+<PackageManagerTabs command="npm run start:dev" />
 
 You can also launch the Developer UI alongside your flow code:
 
-```bash
-genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
-```
+<PackageManagerTabs command="genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts" />
 
 ## Test your flow
 
@@ -226,9 +224,7 @@ The Genkit CLI is required to run the Developer UI. If you followed the installa
 
 Run the following command from your project root:
 
-```bash
-genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts
-```
+<PackageManagerTabs command="genkit start -- npx tsx --watch src/genkit/recipeGeneratorFlow.ts" />
 
 This starts your app and launches the Developer UI at `http://localhost:4000` by default.
 
@@ -248,9 +244,7 @@ To make starting the Developer UI easier, add the following to your `package.jso
 
 Then run it with:
 
-```bash
-npm run genkit:ui
-```
+<PackageManagerTabs command="npm run genkit:ui" />
 
 ### Run and inspect flows
 

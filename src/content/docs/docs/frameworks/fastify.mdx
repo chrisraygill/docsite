@@ -6,6 +6,7 @@ supportedLanguages:
 ---
 
 import { FileTree } from '@astrojs/starlight/components';
+import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
 
 Use this guide when you're building with Fastify and want to expose Genkit flows over HTTP using `@genkit-ai/fetch`. This pattern works well when you want Fastify's routing and plugin model while keeping Genkit on its standard fetch-based protocol.
 
@@ -20,45 +21,25 @@ This guide assumes you're already familiar with building TypeScript server appli
 
 If you don't already have a Fastify project, create one:
 
-```bash
-# Generate a Fastify project
+<PackageManagerTabs command={`
 npm init fastify my-genkit-fastify
-
-# Navigate to the project
 cd my-genkit-fastify
-
-# Install dependencies
 npm install
-```
+`} />
 
 When prompted, choose a TypeScript-friendly setup so you can follow the code in this guide directly.
 
-## Project layout
 
-Your generated starter may include a few extra files, but for this guide you'll mainly work in your Fastify app entrypoint:
-
-<FileTree>
-
-- package.json
-- tsconfig.json
-- src
-  - **index.ts**
-
-</FileTree>
 
 ## Install Genkit packages
 
 Install the Genkit CLI globally:
 
-```bash
-npm install -g genkit-cli
-```
+<PackageManagerTabs command="npm install -g genkit-cli" />
 
 Then install the packages you need in your project:
 
-```bash
-npm install genkit @genkit-ai/google-genai @genkit-ai/fetch
-```
+<PackageManagerTabs command="npm install genkit @genkit-ai/google-genai @genkit-ai/fetch" />
 
 ## Configure your model API key
 
@@ -186,15 +167,25 @@ app.post('/api/:flowName', async (request, reply) => {
 });
 
 await app.listen({ port: 3000, host: '0.0.0.0' });
-```
+
+## Project layout
+
+Verify that your project layout matches the structure below:
+
+<FileTree>
+
+- package.json
+- tsconfig.json
+- src
+  - **index.ts**
+
+</FileTree>
 
 ## Run your application
 
 Run your app locally:
 
-```bash
-npx tsx src/index.ts
-```
+<PackageManagerTabs command="npx tsx src/index.ts" />
 
 ## Test your flow
 
@@ -218,9 +209,7 @@ The Genkit CLI is required to run the Developer UI. If you followed the installa
 
 Run the following command from your project root:
 
-```bash
-genkit start -- npx tsx --watch src/index.ts
-```
+<PackageManagerTabs command="genkit start -- npx tsx --watch src/index.ts" />
 
 This starts your app and launches the Developer UI at `http://localhost:4000` by default.
 
@@ -240,9 +229,7 @@ To make starting the Developer UI easier, add the following to your `package.jso
 
 Then run it with:
 
-```bash
-npm run genkit:ui
-```
+<PackageManagerTabs command="npm run genkit:ui" />
 
 ### Run and inspect flows
 

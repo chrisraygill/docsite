@@ -10,6 +10,7 @@ supportedLanguages:
 
 import { FileTree } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
+import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
 
 Use this guide to add Genkit to a SvelteKit app. You can either define Genkit flows directly in SvelteKit API routes, or connect your SvelteKit frontend to a standalone Genkit backend written in any language.
 
@@ -24,47 +25,29 @@ This guide assumes you're already familiar with building SvelteKit applications.
 
 If you don't already have a SvelteKit project, create one:
 
-```bash
+<PackageManagerTabs command={`
 npx sv create my-genkit-sveltekit
 cd my-genkit-sveltekit
-```
+`} />
 
 When prompted, select the **Minimal** template and enable TypeScript.
 
 <Lang lang="js">
 
-## Project layout
 
-<FileTree>
-
-- package.json
-- svelte.config.js
-- src
-  - routes
-    - api
-      - recipeGeneratorFlow
-        - **\[...path\]/+server.ts**
-    - **+page.svelte**
-  - lib
-    - genkit
-      - **recipeGeneratorFlow.ts**
-
-</FileTree>
 
 ## Install Genkit packages
 
 Install the Genkit CLI globally:
 
-```bash
-npm install -g genkit-cli
-```
+<PackageManagerTabs command="npm install -g genkit-cli" />
 
 Then install the packages you need in your project:
 
-```bash
+<PackageManagerTabs command={`
 npm install genkit @genkit-ai/google-genai @genkit-ai/fetch
 npm install -D tsx
-```
+`} />
 
 ## Configure your model API key
 
@@ -186,21 +169,36 @@ Update `src/routes/+page.svelte`:
     <pre>{JSON.stringify(recipe, null, 2)}</pre>
   {/if}
 </main>
-```
+
+## Project layout
+
+Verify that your project layout matches the structure below:
+
+<FileTree>
+
+- package.json
+- svelte.config.js
+- src
+  - routes
+    - api
+      - recipeGeneratorFlow
+        - **\[...path\]/+server.ts**
+    - **+page.svelte**
+  - lib
+    - genkit
+      - **recipeGeneratorFlow.ts**
+
+</FileTree>
 
 ## Run your application
 
 Run your app locally:
 
-```bash
-npm run dev
-```
+<PackageManagerTabs command="npm run dev" />
 
 You can also launch the Developer UI alongside your flow code:
 
-```bash
-genkit start -- npx tsx --watch src/lib/genkit/recipeGeneratorFlow.ts
-```
+<PackageManagerTabs command="genkit start -- npx tsx --watch src/lib/genkit/recipeGeneratorFlow.ts" />
 
 ## Test your flow
 
@@ -224,9 +222,7 @@ The Genkit CLI is required to run the Developer UI. If you followed the installa
 
 Run the following command from your project root:
 
-```bash
-genkit start -- npx tsx --watch src/lib/genkit/recipeGeneratorFlow.ts
-```
+<PackageManagerTabs command="genkit start -- npx tsx --watch src/lib/genkit/recipeGeneratorFlow.ts" />
 
 This starts your app and launches the Developer UI at `http://localhost:4000` by default.
 
@@ -280,9 +276,7 @@ Since your Genkit backend uses a different language, you'll set up the backend a
 
 ### Install the client library
 
-```bash
-npm install genkit
-```
+<PackageManagerTabs command="npm install genkit" />
 
 ### Call a flow
 
