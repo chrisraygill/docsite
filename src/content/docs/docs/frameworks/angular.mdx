@@ -311,11 +311,17 @@ Start your Angular application locally:
 
 <PackageManagerTabs command="npm start" />
 
+If you are using a standalone backend, make sure your backend server is also running.
+
 <Lang lang="js">
 
 ## Test your flow
 
-Test the endpoint directly:
+Test the flow using either of the following methods.
+
+### Send a request with curl
+
+Send a POST request to the endpoint:
 
 ```bash
 curl -X POST http://localhost:4200/api/recipeGeneratorFlow \
@@ -323,26 +329,24 @@ curl -X POST http://localhost:4200/api/recipeGeneratorFlow \
   -d '{"data":{"ingredient":"avocado","dietaryRestrictions":"vegetarian"}}'
 ```
 
-You should receive a structured recipe in the response.
+The response contains a structured recipe.
 
-## Test in the Developer UI
+### Use the Developer UI
 
-Start the Developer UI from your project root:
+The Developer UI provides a visual flow runner and execution traces, which are useful for iterating on prompts and debugging output.
 
-<PackageManagerTabs command="npx genkit start -- tsx --watch src/genkit/recipeGeneratorFlow.ts" />
+1. Start the Developer UI from your project root:
 
-This launches the Developer UI at `http://localhost:4000` by default.
+   <PackageManagerTabs command="npx genkit start -- tsx --watch src/genkit/recipeGeneratorFlow.ts" />
 
-:::tip[Add a script]
-To make starting the Developer UI easier, add the above command as a script in your `package.json`.
-:::
+   This launches the Developer UI at `http://localhost:4000` by default.
 
-### Run and inspect flows
+   :::tip[Add a script]
+   To make starting the Developer UI easier, add the above command as a script in your `package.json`.
+   :::
 
-In the Developer UI:
-
-1. Select `recipeGeneratorFlow` from the list of flows.
-2. Enter sample input:
+2. Select `recipeGeneratorFlow` from the list of flows.
+3. Enter sample input:
 
    ```json
    {
@@ -351,7 +355,7 @@ In the Developer UI:
    }
    ```
 
-3. Click **Run**
+4. Click **Run**.
 
    You'll see the generated recipe as structured output, along with a visual trace of the AI generation process for debugging and optimization.
 
@@ -371,8 +375,6 @@ In the Developer UI:
    </video>
 
 </Lang>
-
-If you are using a standalone backend, make sure your backend server is also running.
 
 ## Learn more
 
