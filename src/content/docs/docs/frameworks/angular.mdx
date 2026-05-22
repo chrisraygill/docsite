@@ -9,7 +9,8 @@ supportedLanguages:
 ---
 
 import {
-
+Aside,
+Code,
 FileTree,
 LinkButton,
 Tabs,
@@ -17,6 +18,44 @@ TabItem,
 } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
+
+export const componentCode = (url) => 
+`
+import { Component, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { JsonPipe } from '@angular/common';
+import { runFlow } from 'genkit/beta/client';
+
+@Component({
+  selector: 'app-root',
+  imports: [FormsModule, JsonPipe],
+  templateUrl: './app.html',
+  styleUrl: './app.css',
+})
+export class App {
+  ingredient = signal('avocado');
+  dietaryRestrictions = signal('vegetarian');
+  recipe = signal<any | null>(null);
+
+  async generateRecipe() {
+    const result = await runFlow({
+      url: '${url}',
+      input: {
+        ingredient: this.ingredient(),
+        dietaryRestrictions: this.dietaryRestrictions(),
+      },
+    });
+
+    this.recipe.set(result);
+  }
+}
+`;
+
+export const corsCallout = (
+  <Aside type="caution" title="Enable CORS">
+    Enable CORS on your backend server, or the browser will block requests from the Angular application.
+  </Aside>
+);
 
 Use this guide to learn how to add AI-powered features to an Angular application with Genkit.
 
@@ -202,9 +241,9 @@ Verify that your project layout matches the structure below:
 
 <TabItem label="Standalone backend">
 
-You will connect your Angular frontend to a standalone Genkit server running in JavaScript (Express/Hono) or another language.
+Connect your Angular frontend to a standalone Node.js backend (such as Express or Hono).
 
-1. **Set up your backend**: Expose your flow as an HTTP endpoint by following a [server integration guide](/docs/frameworks/overview) in your preferred backend framework (such as Express or Hono).
+1. **Set up your backend**: Expose your flow as an HTTP endpoint with [Express](/docs/frameworks/express) or [Hono](/docs/frameworks/hono).
 2. **Install the Genkit client library**:
 
    <PackageManagerTabs command="npm install genkit" />
@@ -224,7 +263,11 @@ cd my-genkit-angular
 
 ## Connect to a standalone backend
 
-1. **Set up your backend**: Expose your flow as an HTTP endpoint by following a [server integration guide](/docs/frameworks/overview) in your preferred language.
+Your Angular app runs in the browser; your Genkit server runs separately and exposes your flow over HTTP.
+
+1. **Set up your backend**: Expose your flow as an HTTP endpoint with a server integration guide for your language:
+   - Go: [Chi](/docs/frameworks/chi) or [Echo](/docs/frameworks/echo)
+   - Python: [Flask](/docs/frameworks/flask)
 2. **Install the Genkit client library**:
 
    <PackageManagerTabs command="npm install genkit" />
@@ -233,50 +276,43 @@ cd my-genkit-angular
 
 ## Call your flow from your Angular app
 
-Whether using Angular SSR or a standalone backend, update your component to call the flow endpoint:
+Update your Angular component to call the flow endpoint:
 
 ### Component class
 
 Replace the contents of `src/app/app.ts` with the following:
 
-```ts title="src/app/app.ts"
-import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { JsonPipe } from '@angular/common';
-import { runFlow } from 'genkit/beta/client';
+<Lang lang="js">
 
-@Component({
-  selector: 'app-root',
-  imports: [FormsModule, JsonPipe],
-  templateUrl: './app.html',
-  styleUrl: './app.css',
-})
-export class App {
-  ingredient = signal('avocado');
-  dietaryRestrictions = signal('vegetarian');
-  recipe = signal<any | null>(null);
+<Tabs syncKey="angular-setup">
 
-  async generateRecipe() {
-    const result = await runFlow({
-      // For JS SSR, use relative URL: '/api/recipeGeneratorFlow'
-      // For standalone backends, use absolute URL: 'http://localhost:3000/recipeGeneratorFlow'
-      url: '/api/recipeGeneratorFlow',
-      input: {
-        ingredient: this.ingredient(),
-        dietaryRestrictions: this.dietaryRestrictions(),
-      },
-    });
+<TabItem label="Angular SSR">
 
-    this.recipe.set(result);
-  }
-}
-```
+<Code code={componentCode('/api/recipeGeneratorFlow')} lang="ts" meta='title="src/app/app.ts"' />
 
-This component uses Angular **Signals** to manage the form input states reactively. The `generateRecipe()` method calls the flow endpoint using Genkit's `runFlow` client helper and stores the resulting recipe.
+</TabItem>
 
-:::caution[Enable CORS]
-If you are using a standalone backend, enable CORS on your backend server or the browser will block requests from the Angular application.
-:::
+<TabItem label="Standalone backend">
+
+<Code code={componentCode('http://localhost:8080/recipeGeneratorFlow')} lang="ts" meta='title="src/app/app.ts"' />
+
+{corsCallout}
+
+</TabItem>
+
+</Tabs>
+
+</Lang>
+
+<Lang lang="go dart python">
+
+<Code code={componentCode('http://localhost:8080/recipeGeneratorFlow')} lang="ts" meta='title="src/app/app.ts"' />
+
+{corsCallout}
+
+</Lang>
+
+This component uses Angular **Signals** for reactive form state. The `generateRecipe()` method calls the flow endpoint with `runFlow` and stores the result.
 
 ### Component template
 
@@ -303,7 +339,7 @@ Replace the contents of `src/app/app.html` with the following:
 </main>
 ```
 
-The template uses two-way model binding to sync the input fields with the component signals, and binds the button click to `generateRecipe()`. Angular's modern **`@if`** control flow conditionally renders the output, utilizing the built-in **`json` pipe** to format the structured recipe JSON.
+The template uses two-way model binding to sync the input fields with the component signals, and binds the button click to `generateRecipe()`. Angular's **`@if`** control flow conditionally renders the output, using the built-in **`json` pipe** to format the structured recipe JSON.
 
 ## Run your application
 
@@ -361,7 +397,7 @@ The Developer UI provides a visual flow runner and execution traces, which are u
 
 4. Click **Run**.
 
-   You'll see the generated recipe as structured output, along with a visual trace of the AI generation process for debugging and optimization.
+   You'll see the generated recipe as structured output, along with a visual trace of the AI generation process.
 
    <video
      controls
@@ -386,6 +422,8 @@ While the Developer UI is running, any flow invocation triggered from your Angul
 
 <TabItem label="Standalone backend">
 
+Once both your Angular app and your backend are running, use the Developer UI to inspect each flow invocation.
+
 :::tip[Inspect traces from your running app]
 If your backend is running under `genkit start`, any flow invocation triggered from your Angular app (such as clicking **Generate recipe** in the browser) appears in the Developer UI's **Traces** tab.
 :::
@@ -398,16 +436,17 @@ If your backend is running under `genkit start`, any flow invocation triggered f
 
 <Lang lang="go dart python">
 
+Once both your Angular app and your backend are running, use the Developer UI to inspect each flow invocation.
+
 :::tip[Inspect traces from your running app]
 If your backend is running under `genkit start`, any flow invocation triggered from your Angular app (such as clicking **Generate recipe** in the browser) appears in the Developer UI's **Traces** tab.
 :::
 
 </Lang>
 
-## Learn more
+## Next steps
 
+- [Deploy your app](/docs/deployment/overview)
 - [Creating flows](/docs/flows)
 - [Generating content](/docs/models)
-- [Connect a web frontend](/docs/frontend/web-client)
-- [Connect a Flutter app](/docs/frontend/flutter)
 - [Developer tools](/docs/devtools)
