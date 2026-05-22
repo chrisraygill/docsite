@@ -52,7 +52,7 @@ If you don't have an Angular project, create one:
 <TabItem label="Angular SSR">
 
 ```bash
-ng new --ssr --server-routing my-genkit-angular
+ng new --ssr my-genkit-angular
 cd my-genkit-angular
 ```
 
@@ -85,10 +85,14 @@ You will run Genkit server-side directly inside Angular SSR server routes.
 
 <PackageManagerTabs
   command={`
-npm install genkit @genkit-ai/google-genai @genkit-ai/express
+npm install genkit @genkit-ai/google-genai @genkit-ai/express zod
 npm install -D genkit-cli tsx
 `}
 />
+
+:::note[Why install `zod`?]
+Angular's Vite-based SSR dev server uses a strict ESM module runner that does not pick up `z` re-exported through Genkit's main entry, so the flow imports `z` from `zod` directly. Pin `zod@^3.23.8` to match the version Genkit is built against.
+:::
 
 ### Configure your model API key
 
@@ -115,7 +119,8 @@ Create `src/genkit/recipeGeneratorFlow.ts`:
 
 ```ts title="src/genkit/recipeGeneratorFlow.ts"
 import { googleAI } from '@genkit-ai/google-genai';
-import { genkit, z } from 'genkit';
+import { genkit } from 'genkit';
+import { z } from 'zod';
 
 const ai = genkit({
   plugins: [googleAI()],
@@ -190,8 +195,8 @@ Verify that your project layout matches the structure below:
 - package.json
 - src
   - app
-    - app.component.html
-    - app.component.ts
+    - app.html
+    - app.ts
   - genkit
     - recipeGeneratorFlow.ts
   - server.ts
@@ -237,9 +242,9 @@ Whether using Angular SSR or a standalone backend, update your component to call
 
 ### Component class
 
-Replace the contents of `src/app/app.component.ts` with the following:
+Replace the contents of `src/app/app.ts` with the following:
 
-```ts title="src/app/app.component.ts"
+```ts title="src/app/app.ts"
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { JsonPipe } from '@angular/common';
@@ -248,9 +253,10 @@ import { runFlow } from 'genkit/beta/client';
 @Component({
   selector: 'app-root',
   imports: [FormsModule, JsonPipe],
-  templateUrl: './app.component.html',
+  templateUrl: './app.html',
+  styleUrl: './app.css',
 })
-export class AppComponent {
+export class App {
   ingredient = signal('avocado');
   dietaryRestrictions = signal('vegetarian');
   recipe = signal<any | null>(null);
@@ -279,9 +285,9 @@ If you are using a standalone backend, enable CORS on your backend server or the
 
 ### Component template
 
-Replace the contents of `src/app/app.component.html` with the following:
+Replace the contents of `src/app/app.html` with the following:
 
-```angular title="src/app/app.component.html"
+```angular title="src/app/app.html"
 <main>
   <h1>Recipe generator</h1>
   <input
