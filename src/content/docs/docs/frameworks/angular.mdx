@@ -19,9 +19,7 @@ TabItem,
 import Lang from '../../../../components/Lang.astro';
 import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
 
-export const componentCode = (url) => 
-`
-import { Component, signal } from '@angular/core';
+export const componentCode = (url) => `import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { JsonPipe } from '@angular/common';
 import { runFlow } from 'genkit/beta/client';
@@ -57,14 +55,14 @@ export const corsCallout = (
   </Aside>
 );
 
-Use this guide to learn how to add AI-powered features to an Angular application with Genkit.
+By the end of this guide, you'll have an Angular app that calls a Genkit flow and renders its structured response.
 
 <Lang lang="js">
 
 You can integrate Genkit in two ways:
 
 - **Angular SSR**: Run Genkit server-side directly inside Angular SSR server routes.
-- **Standalone backend**: Connect your Angular frontend to a standalone JS/TS backend server (e.g., Express or Hono).
+- **Standalone backend**: Connect your Angular frontend to a standalone Node.js backend (such as Express or Hono).
 
 </Lang>
 
@@ -110,15 +108,11 @@ cd my-genkit-angular
 
 ## Integrate Genkit with Angular
 
-Select your integration architecture:
+If you're not sure which path to choose, Angular SSR is the simpler setup if you're already using SSR; otherwise, use a standalone backend.
 
 <Tabs syncKey="angular-setup">
 
 <TabItem label="Angular SSR">
-
-You will run Genkit server-side directly inside Angular SSR server routes.
-
-
 
 ### Install Genkit packages
 
@@ -204,6 +198,11 @@ export const recipeGeneratorFlow = ai.defineFlow(
 );
 ```
 
+- `genkit({...})` configures Gemini as the default model.
+- The two Zod schemas constrain the flow's input and output.
+- `ai.defineFlow` registers a named, typed flow that can be called over HTTP.
+- `ai.generate` runs the model with the prompt and returns output validated against `RecipeSchema`.
+
 ### Add a server route
 
 Register the flow handler in `src/server.ts`:
@@ -220,6 +219,8 @@ app.use(express.json());
 app.post('/api/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
 ```
 
+Add these lines before the catchall `app.use((req, res, next) => angularApp.handle(req)…)` lower in `server.ts`. The catchall hands every unmatched request to Angular's SSR engine, so the flow route must be registered first.
+
 ### Project layout
 
 Verify that your project layout matches the structure below:
@@ -227,13 +228,16 @@ Verify that your project layout matches the structure below:
 <FileTree>
 
 - package.json
+- ... other Angular config files
 - src
   - app
     - app.html
     - app.ts
+    - ... other component files
   - genkit
     - recipeGeneratorFlow.ts
   - server.ts
+  - ... other Angular source files
 
 </FileTree>
 
@@ -241,7 +245,7 @@ Verify that your project layout matches the structure below:
 
 <TabItem label="Standalone backend">
 
-Connect your Angular frontend to a standalone Node.js backend (such as Express or Hono).
+Your Angular app runs in the browser; your Genkit server runs separately and exposes your flow over HTTP.
 
 1. **Set up your backend**: Expose your flow as an HTTP endpoint with [Express](/docs/frameworks/express) or [Hono](/docs/frameworks/hono).
 2. **Install the Genkit client library**:
@@ -255,6 +259,10 @@ Connect your Angular frontend to a standalone Node.js backend (such as Express o
 </Lang>
 
 <Lang lang="go dart python">
+
+## Create a project
+
+If you don't have an Angular project, create one:
 
 ```bash
 ng new my-genkit-angular
@@ -339,7 +347,7 @@ Replace the contents of `src/app/app.html` with the following:
 </main>
 ```
 
-The template uses two-way model binding to sync the input fields with the component signals, and binds the button click to `generateRecipe()`. Angular's **`@if`** control flow conditionally renders the output, using the built-in **`json` pipe** to format the structured recipe JSON.
+The template binds the inputs to the component signals and the button click to `generateRecipe()`. **`@if`** conditionally renders the output, using the built-in **`json` pipe** to format the structured recipe.
 
 ## Run your application
 
