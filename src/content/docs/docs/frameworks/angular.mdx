@@ -1,6 +1,6 @@
 ---
 title: Angular
-description: Add Genkit AI features to an Angular app — either with SSR server routes or by connecting to a standalone Genkit backend in any language.
+description: Add Genkit AI features to an Angular app, either with SSR server routes or by connecting to a standalone Genkit backend in any language.
 supportedLanguages:
   - js
   - go
@@ -313,9 +313,13 @@ Start your Angular application locally:
 
 If you are using a standalone backend, make sure your backend server is also running.
 
+## Test and inspect your flow
+
 <Lang lang="js">
 
-## Test your flow
+<Tabs syncKey="angular-setup">
+
+<TabItem label="Angular SSR">
 
 Test the flow using either of the following methods.
 
@@ -373,6 +377,30 @@ The Developer UI provides a visual flow runner and execution traces, which are u
      run a Genkit flow in the Developer UI, showing the recipe generator flow
      with input parameters and the resulting structured output.
    </video>
+
+:::tip[Inspect traces from your running app]
+While the Developer UI is running, any flow invocation triggered from your Angular app (such as clicking **Generate recipe** in the browser) appears in the Developer UI's **Traces** tab alongside flows you run manually.
+:::
+
+</TabItem>
+
+<TabItem label="Standalone backend">
+
+:::tip[Inspect traces from your running app]
+If your backend is running under `genkit start`, any flow invocation triggered from your Angular app (such as clicking **Generate recipe** in the browser) appears in the Developer UI's **Traces** tab.
+:::
+
+</TabItem>
+
+</Tabs>
+
+</Lang>
+
+<Lang lang="go dart python">
+
+:::tip[Inspect traces from your running app]
+If your backend is running under `genkit start`, any flow invocation triggered from your Angular app (such as clicking **Generate recipe** in the browser) appears in the Developer UI's **Traces** tab.
+:::
 
 </Lang>
 
