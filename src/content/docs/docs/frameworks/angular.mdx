@@ -85,14 +85,10 @@ You will run Genkit server-side directly inside Angular SSR server routes.
 
 <PackageManagerTabs
   command={`
-npm install genkit @genkit-ai/google-genai @genkit-ai/express zod
+npm install genkit @genkit-ai/google-genai @genkit-ai/express
 npm install -D genkit-cli tsx
 `}
 />
-
-:::note[Why install `zod`?]
-Angular's Vite-based SSR dev server uses a strict ESM module runner that does not pick up `z` re-exported through Genkit's main entry, so the flow imports `z` from `zod` directly. Pin `zod@^3.23.8` to match the version Genkit is built against.
-:::
 
 ### Configure your model API key
 
@@ -119,8 +115,7 @@ Create `src/genkit/recipeGeneratorFlow.ts`:
 
 ```ts title="src/genkit/recipeGeneratorFlow.ts"
 import { googleAI } from '@genkit-ai/google-genai';
-import { genkit } from 'genkit';
-import { z } from 'zod';
+import { genkit, z } from 'genkit';
 
 const ai = genkit({
   plugins: [googleAI()],
