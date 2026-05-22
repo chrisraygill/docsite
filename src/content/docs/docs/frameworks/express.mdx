@@ -218,6 +218,10 @@ In the Developer UI:
      with input parameters and the resulting structured output.
    </video>
 
+### Inspect traces from a connected frontend
+
+While the backend is running under `genkit start`, every flow execution is captured as a trace, including requests triggered by a separate frontend (such as an Angular, Next.js, or Flutter app) hitting your endpoint. Open the **Traces** tab in the Developer UI to inspect inputs, outputs, and each step of the generation, and to re-run any past execution with modified inputs.
+
 ## Serving models
 
 You can also expose a model directly with `expressHandler` so other Genkit apps can consume it as a remote model. For example:
