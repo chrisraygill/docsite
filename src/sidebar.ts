@@ -224,6 +224,7 @@ const DOCS_SIDEBAR = [
   {
     label: "Deployment",
     items: [
+      { label: "Overview", slug: "docs/deployment/overview" },
       { label: "Firebase", slug: "docs/deployment/firebase" },
       { label: "Cloud Run", slug: "docs/deployment/cloud-run" },
       { label: "Azure Functions", slug: "docs/deployment/azure-functions" },
