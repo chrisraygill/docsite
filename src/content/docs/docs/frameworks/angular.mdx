@@ -217,9 +217,10 @@ const app = express(); // Existing Angular SSR setup
 
 app.use(express.json());
 app.post('/api/recipeGeneratorFlow', expressHandler(recipeGeneratorFlow));
-```
 
-Add these lines before the catchall `app.use((req, res, next) => angularApp.handle(req)…)` lower in `server.ts`. The catchall hands every unmatched request to Angular's SSR engine, so the flow route must be registered first.
+app.use((req, res, next) => angularApp.handle(req)); // Existing SSR catchall (keep below the flow route)
+// ...
+```
 
 ### Project layout
 
