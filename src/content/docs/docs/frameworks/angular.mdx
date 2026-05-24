@@ -61,6 +61,8 @@ export class App {
         this.recipe.set(partial as Recipe);
       }
       await result.output;
+    } catch (err) {
+      console.error('Failed to generate recipe', err);
     } finally {
       this.isStreaming.set(false);
     }
@@ -74,22 +76,16 @@ export const corsCallout = (
   </Aside>
 );
 
-Use this guide when you want to add Genkit-powered AI features to an Angular app. You will build **Bargain Chef**, an Angular UI that streams a structured recipe from a Genkit flow while the model calls a tool to find which ingredients are on sale today.
-
-## Choose an integration path
+Use this guide to learn how to add AI and agentic features to an Angular app. You will build **Bargain Chef**: an Angular app that streams a generated, structured recipe that is grounded by ingredients that are on sale.
 
 <Lang lang="js">
 
+## Choose an integration path
+
 Angular can call Genkit in two ways:
 
-- **Angular SSR**: Use this when your Angular app already has server-side rendering and you want the Genkit flow to live in the same project.
-- **Standalone backend**: Use this when your Angular app runs only in the browser, or when you want the Genkit backend deployed and scaled separately.
-
-</Lang>
-
-<Lang lang="go dart python">
-
-Angular runs in JavaScript in the browser, so you will connect the frontend to a standalone Genkit backend exposed over HTTP.
+- **Angular SSR**: One project, one deployment. Your Genkit backend lives alongside your Angular code, shares TypeScript types, and avoids CORS.
+- **Standalone backend and frontend**: Deploy and scale your backend and frontend independently. Reuse the backend across multiple clients, or write it in another language.
 
 </Lang>
 
@@ -102,7 +98,6 @@ Angular runs in JavaScript in the browser, so you will connect the frontend to a
 <TabItem label="Angular SSR">
 
 - Node.js v20 or later
-- npm
 - Angular CLI
 
 </TabItem>
@@ -110,9 +105,8 @@ Angular runs in JavaScript in the browser, so you will connect the frontend to a
 <TabItem label="Standalone backend">
 
 - Node.js v20 or later
-- npm
 - Angular CLI
-- A standalone Genkit backend that exposes a flow over HTTP. Use [Express](/docs/frameworks/express), [Hono](/docs/frameworks/hono), or another option from the [server integration guides](/docs/frameworks/overview).
+- A standalone Genkit backend that exposes an HTTP endpoint. Use [Express](/docs/frameworks/express), [Hono](/docs/frameworks/hono), or another option from the [server integration guides](/docs/frameworks/overview).
 
 </TabItem>
 
@@ -123,27 +117,24 @@ Angular runs in JavaScript in the browser, so you will connect the frontend to a
 <Lang lang="go">
 
 - Node.js v20 or later
-- npm
 - Angular CLI
-- A Genkit backend that exposes a flow over HTTP. Use [Chi](/docs/frameworks/chi), [Echo](/docs/frameworks/echo), or another option from the [server integration guides](/docs/frameworks/overview).
+- A Genkit backend that exposes an HTTP endpoint. Use [Chi](/docs/frameworks/chi), [Echo](/docs/frameworks/echo), or another option from the [server integration guides](/docs/frameworks/overview).
 
 </Lang>
 
 <Lang lang="dart">
 
 - Node.js v20 or later
-- npm
 - Angular CLI
-- A Genkit backend that exposes a flow over HTTP. Use [Shelf](/docs/frameworks/shelf) or another option from the [server integration guides](/docs/frameworks/overview).
+- A Genkit backend that exposes an HTTP endpoint. Use [Shelf](/docs/frameworks/shelf) or another option from the [server integration guides](/docs/frameworks/overview).
 
 </Lang>
 
 <Lang lang="python">
 
 - Node.js v20 or later
-- npm
 - Angular CLI
-- A Genkit backend that exposes a flow over HTTP. Use [Flask](/docs/frameworks/flask), [FastAPI](/docs/frameworks/fastapi), or another option from the [server integration guides](/docs/frameworks/overview).
+- A Genkit backend that exposes an HTTP endpoint. Use [Flask](/docs/frameworks/flask), [FastAPI](/docs/frameworks/fastapi), or another option from the [server integration guides](/docs/frameworks/overview).
 
 </Lang>
 
@@ -151,7 +142,7 @@ This guide assumes you're already familiar with building Angular applications.
 
 ## Create an Angular project
 
-Create a new Angular project for this guide:
+Create a new Angular project:
 
 <Lang lang="js">
 
@@ -196,8 +187,8 @@ These packages provide:
 
 - **`genkit`**: The core SDK for defining flows, tools, schemas, and model calls.
 - **`@genkit-ai/google-genai`**: The Gemini model provider used in this guide.
-- **`@genkit-ai/express`**: The HTTP adapter that exposes the flow from Angular's Express-based SSR server.
-- **`@genkit-ai/middleware`**: Middleware utilities, including the retry middleware used by the sample flow.
+- **`@genkit-ai/express`**: The HTTP adapter that exposes your Genkit backend from Angular's Express-based SSR server.
+- **`@genkit-ai/middleware`**: Middleware utilities, including the retry middleware used in the sample backend.
 - **`genkit-cli` and `tsx`**: Local developer tooling for running the Genkit Developer UI against TypeScript source files.
 
 ### Configure a model API key
@@ -219,7 +210,7 @@ Set the `GEMINI_API_KEY` environment variable to your key:
 export GEMINI_API_KEY=<your API key>
 ```
 
-### Create the flow and tool
+### Create the Genkit backend
 
 Create `src/genkit/bargainChefFlow.ts`:
 
@@ -232,7 +223,6 @@ const ai = genkit({
   plugins: [googleAI()],
 });
 
-// Tool: returns mock grocery deals for weekdays or weekends.
 const getIngredientsOnSale = ai.defineTool(
   {
     name: 'getIngredientsOnSale',
@@ -332,7 +322,7 @@ This backend file combines several Genkit concepts:
 
 ### Add the server route
 
-Register the flow handler in `src/server.ts`:
+Wire up the Genkit backend in `src/server.ts`:
 
 ```ts title="src/server.ts"
 // ...
@@ -374,12 +364,9 @@ Verify that your project layout matches the structure below:
 
 <TabItem label="Standalone backend">
 
-Your Angular app runs in the browser, and your Genkit server runs separately. The frontend calls the flow over HTTP.
+Your Angular app runs in the browser and calls your Genkit backend over HTTP. Install the web client in your Angular project:
 
-1. **Set up the backend**: Expose your flow as an HTTP endpoint with [Express](/docs/frameworks/express), [Hono](/docs/frameworks/hono), or another option from the [server integration guides](/docs/frameworks/overview).
-2. **Install the web client**:
-
-   <PackageManagerTabs command="npm install genkit" />
+<PackageManagerTabs command="npm install genkit" />
 
 </TabItem>
 
@@ -400,31 +387,7 @@ cd my-genkit-angular
 
 ## Set up Genkit
 
-Your Angular app runs in the browser, and your Genkit server runs separately. The frontend calls the flow over HTTP.
-
-</Lang>
-
-<Lang lang="go">
-
-Set up the backend by exposing your flow as an HTTP endpoint with [Chi](/docs/frameworks/chi), [Echo](/docs/frameworks/echo), or another option from the [server integration guides](/docs/frameworks/overview).
-
-</Lang>
-
-<Lang lang="dart">
-
-Set up the backend by exposing your flow as an HTTP endpoint with [Shelf](/docs/frameworks/shelf) or another option from the [server integration guides](/docs/frameworks/overview).
-
-</Lang>
-
-<Lang lang="python">
-
-Set up the backend by exposing your flow as an HTTP endpoint with [Flask](/docs/frameworks/flask), [FastAPI](/docs/frameworks/fastapi), or another option from the [server integration guides](/docs/frameworks/overview).
-
-</Lang>
-
-<Lang lang="go dart python">
-
-Install the web client:
+Your Angular app runs in the browser and calls your Genkit backend over HTTP. Install the web client in your Angular project:
 
 <PackageManagerTabs command="npm install genkit" />
 
@@ -432,7 +395,7 @@ Install the web client:
 
 ## Build the Angular UI
 
-Now update the Angular app so the browser can call your flow endpoint and render streamed output.
+Now update the Angular app so the browser can call your Genkit backend and render streamed output.
 
 ### Update the component class
 
@@ -526,7 +489,7 @@ Replace the contents of `src/app/app.html` with the following:
 
 Each recipe section is wrapped in **`@if`** so it only renders after that field arrives in the stream. The result is a UI that fills in progressively: title first, then description, then ingredients, then steps.
 
-Wrapping the input and button in a `<form>` lets the user submit by pressing Enter. The `(submit)` handler calls `preventDefault()` so the browser doesn't reload the page, then kicks off the streaming flow.
+Wrapping the input and button in a `<form>` lets the user submit by pressing Enter. The `(submit)` handler calls `preventDefault()` so the browser doesn't reload the page, then kicks off the streaming request.
 
 ### Add styles
 
@@ -679,13 +642,39 @@ article h3 {
 
 ## Run the app
 
+<Lang lang="js">
+
+<Tabs syncKey="angular-setup">
+
+<TabItem label="Angular SSR">
+
 Start the Angular development server:
 
 <PackageManagerTabs command="npm start" />
 
-For the standalone backend path, start your Genkit backend in a separate terminal before using the Angular app.
+</TabItem>
 
-## Test and inspect the flow
+<TabItem label="Standalone backend">
+
+Start your Genkit backend in one terminal (follow the run instructions in the [server integration guide](/docs/frameworks/overview) you used). Then start the Angular development server in another terminal:
+
+<PackageManagerTabs command="npm start" />
+
+</TabItem>
+
+</Tabs>
+
+</Lang>
+
+<Lang lang="go dart python">
+
+Start your Genkit backend in one terminal (follow the run instructions in the [server integration guide](/docs/frameworks/overview) you used). Then start the Angular development server in another terminal:
+
+<PackageManagerTabs command="npm start" />
+
+</Lang>
+
+## Test and inspect the app
 
 <Lang lang="js">
 
@@ -697,7 +686,7 @@ You can test the SSR route directly with curl, and you can use the Developer UI 
 
 ### Send a request with curl
 
-After `npm start` is running, use the `-N` flag and an `Accept: text/event-stream` header to consume the streamed response:
+Once the Angular dev server is running, use the `-N` flag and an `Accept: text/event-stream` header to consume the streamed response:
 
 ```bash
 curl -N -X POST http://localhost:4200/api/bargainChefFlow \
