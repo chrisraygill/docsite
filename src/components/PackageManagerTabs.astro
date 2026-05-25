@@ -17,12 +17,11 @@ function convertLine(line: string, target: 'npm' | 'pnpm' | 'yarn' | 'bun'): str
   const installMatch = trimmed.match(installRegex);
   if (installMatch) {
     const args = installMatch[2];
-    const isDev = args.includes('-D') || args.includes('--save-dev');
-    const isGlobal = args.includes('-g') || args.includes('--global');
-    const pkgs = args
-      .replace(/-D|--save-dev|-g|--global/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
+    const flagTokens = new Set(['-D', '--save-dev', '-g', '--global']);
+    const tokens = args.split(/\s+/).filter(Boolean);
+    const isDev = tokens.includes('-D') || tokens.includes('--save-dev');
+    const isGlobal = tokens.includes('-g') || tokens.includes('--global');
+    const pkgs = tokens.filter(t => !flagTokens.has(t)).join(' ');
 
     if (target === 'npm') {
       const flags = isGlobal ? '-g' : (isDev ? '-D' : '');
