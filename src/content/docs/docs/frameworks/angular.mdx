@@ -229,11 +229,15 @@ Install the Genkit web client, which lets the browser call your standalone backe
 
 <Lang lang="js">
 
-## Create the Genkit backend
+## Create the backend
 
 <Tabs syncKey="angular-setup">
 
 <TabItem label="Angular SSR">
+
+The backend handles requests from the Angular app. For each request, it prompts Gemini to draft a recipe, lets the model call a tool to look up today's grocery sale prices, and streams the partial recipe back to the browser as it's generated.
+
+The whole pipeline is a single Genkit flow. A flow is a special Genkit function with built-in observability, type safety, and tooling integration.
 
 Create `src/genkit/bargainChefFlow.ts`:
 
@@ -312,7 +316,6 @@ export const bargainChefFlow = ai.defineFlow(
   async ({ craving }, { sendChunk }) => {
     const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
-    // Stream structured output while the model can call tools.
     const { stream, response } = ai.generateStream({
       model: googleAI.model('gemini-flash-latest', { temperature: 0.7 }),
       prompt: `Today is ${today}. The user is craving: ${craving}.
@@ -334,13 +337,12 @@ Call the getIngredientsOnSale tool with the dayType that matches today. Saturday
 );
 ```
 
-This backend file combines several Genkit concepts:
+The code uses several core Genkit concepts:
 
-- **Tool calling**: `getIngredientsOnSale` lets the model ask your application for grocery deals before it finishes the recipe. The tool uses a typed input schema, so the model must choose either `weekday` or `weekend`. In a real app, the tool could query a pricing database, inventory system, or third-party API.
-- **Structured output**: `RecipeSchema` defines the final recipe shape. The flow declares it as `outputSchema` to validate the complete response.
-- **Streaming**: `RecipeSchema.partial()` describes the partial objects sent while the model is still generating. `ai.generateStream` returns chunks as they arrive, and `sendChunk` forwards each `chunk.output` to the client.
-- **Middleware**: `retry` retries transient model errors, such as timeouts or rate limits.
-- **Final response handling**: The flow still awaits `response` after streaming chunks so the HTTP request resolves with a complete recipe.
+- **Schemas** validate and describe the data flowing through the flow. `inputSchema` declares the request shape (`craving`); `outputSchema` (`RecipeSchema`) is the final recipe shape Genkit validates the model's response against; `streamSchema` (`RecipeSchema.partial()`) allows fields to be absent in the in-progress chunks emitted during streaming.
+- **Tools** let the model call into your code mid-generation. `getIngredientsOnSale` is a tool the model invokes to fetch current sale prices before finalizing the recipe. Its typed input schema forces the model to pick `dayType: 'weekday'` or `'weekend'`. In a real app, the tool could query a pricing database, inventory system, or third-party API.
+- **Streaming** turns a single generation into a series of updates. `ai.generateStream` yields chunks as the model produces them, and `sendChunk` forwards each one to the browser so the UI can fill in field by field. After the stream completes, the flow awaits `response` so the HTTP request still resolves with a validated, complete recipe.
+- **Middleware** wraps generation with reusable behavior. The `retry` middleware automatically retries transient model errors like rate limits and timeouts.
 
 ### Add the server route
 
