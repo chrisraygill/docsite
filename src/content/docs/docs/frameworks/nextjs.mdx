@@ -9,240 +9,23 @@ supportedLanguages:
 ---
 
 import {
-Aside,
-Code,
-FileTree,
-LinkButton,
-Tabs,
-TabItem,
+  Aside,
+  Code,
+  FileTree,
+  LinkButton,
+  Tabs,
+  TabItem,
 } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
-
-export const appRouterPageCode = (url, importLine) => `'use client';
-
-import { useState } from 'react';
-${importLine}
-
-interface RecipeIngredient {
-  name?: string;
-  quantity?: string;
-  onSale?: boolean;
-}
-
-interface Recipe {
-  title?: string;
-  description?: string;
-  servings?: number;
-  ingredients?: RecipeIngredient[];
-  steps?: string[];
-}
-
-export default function Home() {
-  const [craving, setCraving] = useState('something warm with chicken');
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [isStreaming, setIsStreaming] = useState(false);
-
-  async function generateRecipe(event: React.FormEvent) {
-    event.preventDefault();
-    if (!craving.trim()) return;
-    setRecipe(null);
-    setIsStreaming(true);
-    try {
-      const result = streamFlow({
-        url: '${url}',
-        input: { craving },
-      });
-      for await (const partial of result.stream) {
-        setRecipe(partial as Recipe);
-      }
-      await result.output;
-    } catch (err) {
-      console.error('Failed to generate recipe', err);
-    } finally {
-      setIsStreaming(false);
-    }
-  }
-
-  return (
-    <main>
-      <h1>Bargain Chef</h1>
-      <p className="tagline">
-        Tell me what you feel like eating and I&apos;ll suggest a recipe built
-        around today&apos;s grocery deals.
-      </p>
-
-      <form className="prompt" onSubmit={generateRecipe}>
-        <input
-          type="text"
-          value={craving}
-          onChange={(e) => setCraving(e.target.value)}
-          name="craving"
-          placeholder="What are you in the mood for?"
-          disabled={isStreaming}
-        />
-        <button type="submit" disabled={isStreaming}>
-          {isStreaming ? 'Cooking…' : 'Suggest a recipe'}
-        </button>
-      </form>
-
-      {recipe && (
-        <article>
-          {recipe.title && <h2>{recipe.title}</h2>}
-          {recipe.description && (
-            <p className="description">{recipe.description}</p>
-          )}
-          {recipe.servings && (
-            <p className="serves">
-              <strong>Serves:</strong> {recipe.servings}
-            </p>
-          )}
-
-          {recipe.ingredients && recipe.ingredients.length > 0 && (
-            <>
-              <h3>Ingredients</h3>
-              <ul className="ingredients">
-                {recipe.ingredients.map((ing, i) => (
-                  <li key={i}>
-                    {ing.quantity} {ing.name}
-                    {ing.onSale && <span className="badge">on sale</span>}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {recipe.steps && recipe.steps.length > 0 && (
-            <>
-              <h3>Steps</h3>
-              <ol className="steps">
-                {recipe.steps.map((step, i) => (
-                  <li key={i}>{step}</li>
-                ))}
-              </ol>
-            </>
-          )}
-        </article>
-      )}
-    </main>
-  );
-}
-`;
-
-export const pagesRouterPageCode = (url) => `import { useState } from 'react';
-import { streamFlow } from 'genkit/beta/client';
-import styles from '../styles/Home.module.css';
-
-interface RecipeIngredient {
-  name?: string;
-  quantity?: string;
-  onSale?: boolean;
-}
-
-interface Recipe {
-  title?: string;
-  description?: string;
-  servings?: number;
-  ingredients?: RecipeIngredient[];
-  steps?: string[];
-}
-
-export default function Home() {
-  const [craving, setCraving] = useState('something warm with chicken');
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [isStreaming, setIsStreaming] = useState(false);
-
-  async function generateRecipe(event: React.FormEvent) {
-    event.preventDefault();
-    if (!craving.trim()) return;
-    setRecipe(null);
-    setIsStreaming(true);
-    try {
-      const result = streamFlow({
-        url: '${url}',
-        input: { craving },
-      });
-      for await (const partial of result.stream) {
-        setRecipe(partial as Recipe);
-      }
-      await result.output;
-    } catch (err) {
-      console.error('Failed to generate recipe', err);
-    } finally {
-      setIsStreaming(false);
-    }
-  }
-
-  return (
-    <main className={styles.main}>
-      <h1>Bargain Chef</h1>
-      <p className={styles.tagline}>
-        Tell me what you feel like eating and I&apos;ll suggest a recipe built around
-        today&apos;s grocery deals.
-      </p>
-
-      <form className={styles.prompt} onSubmit={generateRecipe}>
-        <input
-          type="text"
-          value={craving}
-          onChange={(e) => setCraving(e.target.value)}
-          name="craving"
-          placeholder="What are you in the mood for?"
-          disabled={isStreaming}
-        />
-        <button type="submit" disabled={isStreaming}>
-          {isStreaming ? 'Cooking…' : 'Suggest a recipe'}
-        </button>
-      </form>
-
-      {recipe && (
-        <article className={styles.recipe}>
-          {recipe.title && <h2>{recipe.title}</h2>}
-          {recipe.description && (
-            <p className={styles.description}>{recipe.description}</p>
-          )}
-          {recipe.servings && (
-            <p className={styles.serves}>
-              <strong>Serves:</strong> {recipe.servings}
-            </p>
-          )}
-
-          {recipe.ingredients && recipe.ingredients.length > 0 && (
-            <>
-              <h3>Ingredients</h3>
-              <ul className={styles.ingredients}>
-                {recipe.ingredients.map((ing, i) => (
-                  <li key={i}>
-                    {ing.quantity} {ing.name}
-                    {ing.onSale && (
-                      <span className={styles.badge}>on sale</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {recipe.steps && recipe.steps.length > 0 && (
-            <>
-              <h3>Steps</h3>
-              <ol className={styles.steps}>
-                {recipe.steps.map((step, i) => (
-                  <li key={i}>{step}</li>
-                ))}
-              </ol>
-            </>
-          )}
-        </article>
-      )}
-    </main>
-  );
-}
-`;
+import bargainChefFlowCode from './_snippets/bargainChefFlow.ts?raw';
+import { appRouterPageCode } from './_snippets/nextjs-app-router-page';
+import { pagesRouterPageCode } from './_snippets/nextjs-pages-router-page';
 
 export const corsCallout = (
   <Aside type="caution" title="Enable CORS on the backend">
-    If your Next.js app and Genkit backend run on different origins, configure CORS on the backend or the browser will block the request.
+    If your Next.js app and Genkit backend run on different origins, configure
+    CORS on the backend or the browser will block the request.
   </Aside>
 );
 
@@ -472,101 +255,11 @@ The whole pipeline is a single Genkit flow. A flow is a special Genkit function 
 
 Create `src/genkit/bargainChefFlow.ts`:
 
-```ts title="src/genkit/bargainChefFlow.ts"
-import { googleAI } from '@genkit-ai/google-genai';
-import { retry } from '@genkit-ai/middleware';
-import { genkit, z } from 'genkit';
-
-const ai = genkit({
-  plugins: [googleAI()],
-});
-
-const getIngredientsOnSale = ai.defineTool(
-  {
-    name: 'getIngredientsOnSale',
-    description:
-      'Returns the ingredients on sale at the local grocery store, with prices. The sale set differs between weekdays and weekends.',
-    inputSchema: z.object({
-      dayType: z
-        .enum(['weekday', 'weekend'])
-        .describe('Whether to fetch weekday or weekend sale prices.'),
-    }),
-    outputSchema: z.array(
-      z.object({
-        name: z.string(),
-        price: z.string(),
-      }),
-    ),
-  },
-  async ({ dayType }) => {
-    // Mock data: in a real app, query a pricing database.
-    return dayType === 'weekend'
-      ? [
-          { name: 'chicken breast', price: '$2.99/lb' },
-          { name: 'pasta', price: '$0.79' },
-          { name: 'canned tomatoes', price: '$0.99' },
-          { name: 'garlic', price: '$0.50 / head' },
-          { name: 'olive oil', price: '$6.99' },
-        ]
-      : [
-          { name: 'eggs', price: '$3.49 / dozen' },
-          { name: 'spinach', price: '$1.99' },
-          { name: 'parmesan', price: '$4.99' },
-          { name: 'lemons', price: '$0.50 each' },
-          { name: 'rice', price: '$2.49' },
-          { name: 'butter', price: '$3.99' },
-        ];
-  },
-);
-
-const RecipeSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  servings: z.number(),
-  ingredients: z.array(
-    z.object({
-      name: z.string(),
-      quantity: z.string(),
-      onSale: z.boolean(),
-    }),
-  ),
-  steps: z.array(z.string()),
-});
-
-export const bargainChefFlow = ai.defineFlow(
-  {
-    name: 'bargainChefFlow',
-    inputSchema: z.object({
-      craving: z
-        .string()
-        .describe('What the user feels like eating right now.'),
-    }),
-    outputSchema: RecipeSchema,
-    streamSchema: RecipeSchema.partial(),
-  },
-  async ({ craving }, { sendChunk }) => {
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-
-    const { stream, response } = ai.generateStream({
-      model: googleAI.model('gemini-flash-latest', { temperature: 0.7 }),
-      prompt: `Today is ${today}. The user is craving: ${craving}.
-
-Call the getIngredientsOnSale tool with the dayType that matches today. Saturday and Sunday are weekends; all other days are weekdays. Then propose ONE recipe that takes advantage of those deals. For each ingredient, set onSale=true if it appears in the tool's response, false otherwise.`,
-      tools: [getIngredientsOnSale],
-      output: { schema: RecipeSchema },
-      use: [retry({ maxRetries: 3 })],
-    });
-
-    for await (const chunk of stream) {
-      if (chunk.output) sendChunk(chunk.output);
-    }
-
-    const { output } = await response;
-    if (!output) throw new Error('Failed to generate recipe');
-    return output;
-  },
-);
-```
+<Code
+  code={bargainChefFlowCode}
+  lang="ts"
+  meta='title="src/genkit/bargainChefFlow.ts"'
+/>
 
 The file builds the flow in four parts:
 
@@ -619,101 +312,11 @@ The whole pipeline is a single Genkit flow. A flow is a special Genkit function 
 
 Create `src/genkit/bargainChefFlow.ts`:
 
-```ts title="src/genkit/bargainChefFlow.ts"
-import { googleAI } from '@genkit-ai/google-genai';
-import { retry } from '@genkit-ai/middleware';
-import { genkit, z } from 'genkit';
-
-const ai = genkit({
-  plugins: [googleAI()],
-});
-
-const getIngredientsOnSale = ai.defineTool(
-  {
-    name: 'getIngredientsOnSale',
-    description:
-      'Returns the ingredients on sale at the local grocery store, with prices. The sale set differs between weekdays and weekends.',
-    inputSchema: z.object({
-      dayType: z
-        .enum(['weekday', 'weekend'])
-        .describe('Whether to fetch weekday or weekend sale prices.'),
-    }),
-    outputSchema: z.array(
-      z.object({
-        name: z.string(),
-        price: z.string(),
-      }),
-    ),
-  },
-  async ({ dayType }) => {
-    // Mock data: in a real app, query a pricing database.
-    return dayType === 'weekend'
-      ? [
-          { name: 'chicken breast', price: '$2.99/lb' },
-          { name: 'pasta', price: '$0.79' },
-          { name: 'canned tomatoes', price: '$0.99' },
-          { name: 'garlic', price: '$0.50 / head' },
-          { name: 'olive oil', price: '$6.99' },
-        ]
-      : [
-          { name: 'eggs', price: '$3.49 / dozen' },
-          { name: 'spinach', price: '$1.99' },
-          { name: 'parmesan', price: '$4.99' },
-          { name: 'lemons', price: '$0.50 each' },
-          { name: 'rice', price: '$2.49' },
-          { name: 'butter', price: '$3.99' },
-        ];
-  },
-);
-
-const RecipeSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  servings: z.number(),
-  ingredients: z.array(
-    z.object({
-      name: z.string(),
-      quantity: z.string(),
-      onSale: z.boolean(),
-    }),
-  ),
-  steps: z.array(z.string()),
-});
-
-export const bargainChefFlow = ai.defineFlow(
-  {
-    name: 'bargainChefFlow',
-    inputSchema: z.object({
-      craving: z
-        .string()
-        .describe('What the user feels like eating right now.'),
-    }),
-    outputSchema: RecipeSchema,
-    streamSchema: RecipeSchema.partial(),
-  },
-  async ({ craving }, { sendChunk }) => {
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-
-    const { stream, response } = ai.generateStream({
-      model: googleAI.model('gemini-flash-latest', { temperature: 0.7 }),
-      prompt: `Today is ${today}. The user is craving: ${craving}.
-
-Call the getIngredientsOnSale tool with the dayType that matches today. Saturday and Sunday are weekends; all other days are weekdays. Then propose ONE recipe that takes advantage of those deals. For each ingredient, set onSale=true if it appears in the tool's response, false otherwise.`,
-      tools: [getIngredientsOnSale],
-      output: { schema: RecipeSchema },
-      use: [retry({ maxRetries: 3 })],
-    });
-
-    for await (const chunk of stream) {
-      if (chunk.output) sendChunk(chunk.output);
-    }
-
-    const { output } = await response;
-    if (!output) throw new Error('Failed to generate recipe');
-    return output;
-  },
-);
-```
+<Code
+  code={bargainChefFlowCode}
+  lang="ts"
+  meta='title="src/genkit/bargainChefFlow.ts"'
+/>
 
 The file builds the flow in four parts:
 
@@ -791,7 +394,7 @@ Verify that your project layout matches the structure below:
     - api
       - bargainChefFlow.ts
     - index.tsx
-    - _app.tsx
+    - \_app.tsx
     - ... other Next.js page files
   - styles
     - Home.module.css
@@ -842,7 +445,11 @@ The `"use client"` directive at the top marks this as a client component, which 
 
 Replace the contents of `src/pages/index.tsx` with the following:
 
-<Code code={pagesRouterPageCode('/api/bargainChefFlow')} lang="tsx" meta='title="src/pages/index.tsx"' />
+<Code
+  code={pagesRouterPageCode('/api/bargainChefFlow')}
+  lang="tsx"
+  meta='title="src/pages/index.tsx"'
+/>
 
 </TabItem>
 
@@ -936,7 +543,9 @@ h1 {
   border: 1px solid #d0d0d0;
   border-radius: 8px;
   background: #fff;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .prompt input:focus {

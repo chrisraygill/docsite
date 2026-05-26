@@ -5,8 +5,9 @@ supportedLanguages:
   - js
 ---
 
-import { FileTree, LinkButton } from '@astrojs/starlight/components';
+import { Code, FileTree, LinkButton } from '@astrojs/starlight/components';
 import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
+import bargainChefFlowCode from './_snippets/bargainChefFlow.ts?raw';
 
 Use this guide to learn how to build a standalone Genkit backend with Fastify. You will build **Bargain Chef**: a Fastify server that streams a recipe field-by-field as the model generates it, calling a tool to look up today's grocery sale prices and grounding the ingredients in the deals. Fastify exposes the flow over HTTP using `@genkit-ai/fetch`, so any client (web, mobile, or another service) can call it.
 
@@ -39,7 +40,7 @@ Then install the packages you need in your project:
 
 <PackageManagerTabs
   command={`
-npm install genkit @genkit-ai/google-genai @genkit-ai/fetch @genkit-ai/middleware
+npm install genkit @genkit-ai/google-genai @genkit-ai/fetch @genkit-ai/middleware @fastify/cors
 npm install -D tsx
 `}
 />
@@ -50,6 +51,7 @@ These packages include:
 - **`@genkit-ai/google-genai`**: Plugin that connects Genkit to Google's Gemini models.
 - **`@genkit-ai/fetch`**: Fetch-based handlers you can wire into any HTTP framework.
 - **`@genkit-ai/middleware`**: Production-ready generation middleware.
+- **`@fastify/cors`**: Fastify CORS plugin. Lets browser frontends served from a different origin call the Genkit endpoint.
 - **`genkit-cli`**: CLI tool that enables Genkit testing and observability.
 
 ### Configure a model API key
@@ -81,101 +83,11 @@ The whole pipeline is a single Genkit flow. A flow is a special Genkit function 
 
 Create `src/genkit/bargainChefFlow.ts`:
 
-```ts title="src/genkit/bargainChefFlow.ts"
-import { googleAI } from '@genkit-ai/google-genai';
-import { retry } from '@genkit-ai/middleware';
-import { genkit, z } from 'genkit';
-
-const ai = genkit({
-  plugins: [googleAI()],
-});
-
-const getIngredientsOnSale = ai.defineTool(
-  {
-    name: 'getIngredientsOnSale',
-    description:
-      'Returns the ingredients on sale at the local grocery store, with prices. The sale set differs between weekdays and weekends.',
-    inputSchema: z.object({
-      dayType: z
-        .enum(['weekday', 'weekend'])
-        .describe('Whether to fetch weekday or weekend sale prices.'),
-    }),
-    outputSchema: z.array(
-      z.object({
-        name: z.string(),
-        price: z.string(),
-      }),
-    ),
-  },
-  async ({ dayType }) => {
-    // Mock data: in a real app, query a pricing database.
-    return dayType === 'weekend'
-      ? [
-          { name: 'chicken breast', price: '$2.99/lb' },
-          { name: 'pasta', price: '$0.79' },
-          { name: 'canned tomatoes', price: '$0.99' },
-          { name: 'garlic', price: '$0.50 / head' },
-          { name: 'olive oil', price: '$6.99' },
-        ]
-      : [
-          { name: 'eggs', price: '$3.49 / dozen' },
-          { name: 'spinach', price: '$1.99' },
-          { name: 'parmesan', price: '$4.99' },
-          { name: 'lemons', price: '$0.50 each' },
-          { name: 'rice', price: '$2.49' },
-          { name: 'butter', price: '$3.99' },
-        ];
-  },
-);
-
-const RecipeSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  servings: z.number(),
-  ingredients: z.array(
-    z.object({
-      name: z.string(),
-      quantity: z.string(),
-      onSale: z.boolean(),
-    }),
-  ),
-  steps: z.array(z.string()),
-});
-
-export const bargainChefFlow = ai.defineFlow(
-  {
-    name: 'bargainChefFlow',
-    inputSchema: z.object({
-      craving: z
-        .string()
-        .describe('What the user feels like eating right now.'),
-    }),
-    outputSchema: RecipeSchema,
-    streamSchema: RecipeSchema.partial(),
-  },
-  async ({ craving }, { sendChunk }) => {
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-
-    const { stream, response } = ai.generateStream({
-      model: googleAI.model('gemini-flash-latest', { temperature: 0.7 }),
-      prompt: `Today is ${today}. The user is craving: ${craving}.
-
-Call the getIngredientsOnSale tool with the dayType that matches today. Saturday and Sunday are weekends; all other days are weekdays. Then propose ONE recipe that takes advantage of those deals. For each ingredient, set onSale=true if it appears in the tool's response, false otherwise.`,
-      tools: [getIngredientsOnSale],
-      output: { schema: RecipeSchema },
-      use: [retry({ maxRetries: 3 })],
-    });
-
-    for await (const chunk of stream) {
-      if (chunk.output) sendChunk(chunk.output);
-    }
-
-    const { output } = await response;
-    if (!output) throw new Error('Failed to generate recipe');
-    return output;
-  },
-);
-```
+<Code
+  code={bargainChefFlowCode}
+  lang="ts"
+  meta='title="src/genkit/bargainChefFlow.ts"'
+/>
 
 The file builds the flow in four parts:
 
@@ -192,6 +104,7 @@ Wire up the Genkit backend in `src/index.ts`. Fastify's request and response typ
 import { Readable } from 'node:stream';
 import { fetchHandlers } from '@genkit-ai/fetch';
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { bargainChefFlow } from './genkit/bargainChefFlow';
 
@@ -244,6 +157,7 @@ async function sendWebResponse(reply: FastifyReply, response: Response) {
 }
 
 const app = Fastify({ logger: true });
+await app.register(cors, { origin: true });
 const handleFlowRequest = fetchHandlers([bargainChefFlow], '/api');
 
 app.post('/api/:flowName', async (request, reply) => {

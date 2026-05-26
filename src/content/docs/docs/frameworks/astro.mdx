@@ -9,105 +9,22 @@ supportedLanguages:
 ---
 
 import {
-Aside,
-Code,
-FileTree,
-LinkButton,
-Tabs,
-TabItem,
+  Aside,
+  Code,
+  FileTree,
+  LinkButton,
+  Tabs,
+  TabItem,
 } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
-
-export const pageScript = (url) => `import { streamFlow } from 'genkit/beta/client';
-
-interface RecipeIngredient {
-  name?: string;
-  quantity?: string;
-  onSale?: boolean;
-}
-
-interface Recipe {
-  title?: string;
-  description?: string;
-  servings?: number;
-  ingredients?: RecipeIngredient[];
-  steps?: string[];
-}
-
-const form = document.getElementById('prompt-form') as HTMLFormElement;
-const cravingInput = document.getElementById('craving') as HTMLInputElement;
-const submitButton = document.getElementById('submit') as HTMLButtonElement;
-const recipeEl = document.getElementById('recipe') as HTMLElement;
-
-let isStreaming = false;
-
-function setStreaming(value: boolean) {
-  isStreaming = value;
-  cravingInput.disabled = value;
-  submitButton.disabled = value;
-  submitButton.textContent = value ? 'Cooking…' : 'Suggest a recipe';
-}
-
-function render(recipe: Recipe | null) {
-  if (!recipe) {
-    recipeEl.innerHTML = '';
-    return;
-  }
-
-  const parts: string[] = ['<article>'];
-  if (recipe.title) parts.push(\`<h2>\${recipe.title}</h2>\`);
-  if (recipe.description) parts.push(\`<p class="description">\${recipe.description}</p>\`);
-  if (recipe.servings) parts.push(\`<p class="serves"><strong>Serves:</strong> \${recipe.servings}</p>\`);
-
-  if (recipe.ingredients?.length) {
-    parts.push('<h3>Ingredients</h3><ul class="ingredients">');
-    for (const ing of recipe.ingredients) {
-      const badge = ing.onSale ? ' <span class="badge">on sale</span>' : '';
-      parts.push(\`<li>\${ing.quantity ?? ''} \${ing.name ?? ''}\${badge}</li>\`);
-    }
-    parts.push('</ul>');
-  }
-
-  if (recipe.steps?.length) {
-    parts.push('<h3>Steps</h3><ol class="steps">');
-    for (const step of recipe.steps) {
-      parts.push(\`<li>\${step}</li>\`);
-    }
-    parts.push('</ol>');
-  }
-
-  parts.push('</article>');
-  recipeEl.innerHTML = parts.join('');
-}
-
-form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const craving = cravingInput.value.trim();
-  if (!craving) return;
-
-  render(null);
-  setStreaming(true);
-  try {
-    const result = streamFlow({
-      url: '${url}',
-      input: { craving },
-    });
-    for await (const partial of result.stream) {
-      render(partial as Recipe);
-    }
-    await result.output;
-  } catch (err) {
-    console.error('Failed to generate recipe', err);
-  } finally {
-    setStreaming(false);
-  }
-});
-`;
+import bargainChefFlowCode from './_snippets/bargainChefFlow.ts?raw';
+import { pageScript } from './_snippets/astro-page-script';
 
 export const corsCallout = (
   <Aside type="caution" title="Enable CORS on the backend">
-    If your Astro app and Genkit backend run on different origins, configure CORS on the backend or the browser will block the request.
+    If your Astro app and Genkit backend run on different origins, configure
+    CORS on the backend or the browser will block the request.
   </Aside>
 );
 
@@ -185,10 +102,12 @@ This guide assumes you're already familiar with building Astro applications.
 
 ### Create the Astro project
 
-<PackageManagerTabs command={`
+<PackageManagerTabs
+  command={`
 npm create astro@latest my-genkit-astro
 cd my-genkit-astro
-`} />
+`}
+/>
 
 When prompted, choose the **Empty** template and enable TypeScript.
 
@@ -256,10 +175,12 @@ export default defineConfig({
 
 Create the Astro project:
 
-<PackageManagerTabs command={`
+<PackageManagerTabs
+  command={`
 npm create astro@latest my-genkit-astro
 cd my-genkit-astro
-`} />
+`}
+/>
 
 When prompted, choose the **Empty** template and enable TypeScript.
 
@@ -277,10 +198,12 @@ Install the Genkit web client, which lets the browser call your standalone backe
 
 Create the Astro project:
 
-<PackageManagerTabs command={`
+<PackageManagerTabs
+  command={`
 npm create astro@latest my-genkit-astro
 cd my-genkit-astro
-`} />
+`}
+/>
 
 When prompted, choose the **Empty** template and enable TypeScript.
 
@@ -304,101 +227,11 @@ The whole pipeline is a single Genkit flow. A flow is a special Genkit function 
 
 Create `src/genkit/bargainChefFlow.ts`:
 
-```ts title="src/genkit/bargainChefFlow.ts"
-import { googleAI } from '@genkit-ai/google-genai';
-import { retry } from '@genkit-ai/middleware';
-import { genkit, z } from 'genkit';
-
-const ai = genkit({
-  plugins: [googleAI()],
-});
-
-const getIngredientsOnSale = ai.defineTool(
-  {
-    name: 'getIngredientsOnSale',
-    description:
-      'Returns the ingredients on sale at the local grocery store, with prices. The sale set differs between weekdays and weekends.',
-    inputSchema: z.object({
-      dayType: z
-        .enum(['weekday', 'weekend'])
-        .describe('Whether to fetch weekday or weekend sale prices.'),
-    }),
-    outputSchema: z.array(
-      z.object({
-        name: z.string(),
-        price: z.string(),
-      }),
-    ),
-  },
-  async ({ dayType }) => {
-    // Mock data: in a real app, query a pricing database.
-    return dayType === 'weekend'
-      ? [
-          { name: 'chicken breast', price: '$2.99/lb' },
-          { name: 'pasta', price: '$0.79' },
-          { name: 'canned tomatoes', price: '$0.99' },
-          { name: 'garlic', price: '$0.50 / head' },
-          { name: 'olive oil', price: '$6.99' },
-        ]
-      : [
-          { name: 'eggs', price: '$3.49 / dozen' },
-          { name: 'spinach', price: '$1.99' },
-          { name: 'parmesan', price: '$4.99' },
-          { name: 'lemons', price: '$0.50 each' },
-          { name: 'rice', price: '$2.49' },
-          { name: 'butter', price: '$3.99' },
-        ];
-  },
-);
-
-const RecipeSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  servings: z.number(),
-  ingredients: z.array(
-    z.object({
-      name: z.string(),
-      quantity: z.string(),
-      onSale: z.boolean(),
-    }),
-  ),
-  steps: z.array(z.string()),
-});
-
-export const bargainChefFlow = ai.defineFlow(
-  {
-    name: 'bargainChefFlow',
-    inputSchema: z.object({
-      craving: z
-        .string()
-        .describe('What the user feels like eating right now.'),
-    }),
-    outputSchema: RecipeSchema,
-    streamSchema: RecipeSchema.partial(),
-  },
-  async ({ craving }, { sendChunk }) => {
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-
-    const { stream, response } = ai.generateStream({
-      model: googleAI.model('gemini-flash-latest', { temperature: 0.7 }),
-      prompt: `Today is ${today}. The user is craving: ${craving}.
-
-Call the getIngredientsOnSale tool with the dayType that matches today. Saturday and Sunday are weekends; all other days are weekdays. Then propose ONE recipe that takes advantage of those deals. For each ingredient, set onSale=true if it appears in the tool's response, false otherwise.`,
-      tools: [getIngredientsOnSale],
-      output: { schema: RecipeSchema },
-      use: [retry({ maxRetries: 3 })],
-    });
-
-    for await (const chunk of stream) {
-      if (chunk.output) sendChunk(chunk.output);
-    }
-
-    const { output } = await response;
-    if (!output) throw new Error('Failed to generate recipe');
-    return output;
-  },
-);
-```
+<Code
+  code={bargainChefFlowCode}
+  lang="ts"
+  meta='title="src/genkit/bargainChefFlow.ts"'
+/>
 
 The file builds the flow in four parts:
 
@@ -469,7 +302,11 @@ Now update the Astro page so the browser can call your Genkit backend and render
 
 You'll drop the following script into `src/pages/index.astro` in the next step. It calls your API route and renders streamed updates.
 
-<Code code={pageScript('/api/bargainChefFlow')} lang="ts" meta='title="src/pages/index.astro (script block)"' />
+<Code
+  code={pageScript('/api/bargainChefFlow')}
+  lang="ts"
+  meta='title="src/pages/index.astro (script block)"'
+/>
 
 </TabItem>
 
@@ -477,7 +314,11 @@ You'll drop the following script into `src/pages/index.astro` in the next step. 
 
 You'll drop the following script into `src/pages/index.astro` in the next step. The URL points to your standalone backend; `8080` is the default port for the Express integration, so adjust it if your backend uses a different port.
 
-<Code code={pageScript('http://localhost:8080/bargainChefFlow')} lang="ts" meta='title="src/pages/index.astro (script block)"' />
+<Code
+  code={pageScript('http://localhost:8080/bargainChefFlow')}
+  lang="ts"
+  meta='title="src/pages/index.astro (script block)"'
+/>
 
 {corsCallout}
 
@@ -491,7 +332,11 @@ You'll drop the following script into `src/pages/index.astro` in the next step. 
 
 You'll drop the following script into `src/pages/index.astro` in the next step. The URL points to your standalone backend; adjust the port if your backend doesn't run on `8080`.
 
-<Code code={pageScript('http://localhost:8080/bargainChefFlow')} lang="ts" meta='title="src/pages/index.astro (script block)"' />
+<Code
+  code={pageScript('http://localhost:8080/bargainChefFlow')}
+  lang="ts"
+  meta='title="src/pages/index.astro (script block)"'
+/>
 
 {corsCallout}
 
@@ -693,7 +538,9 @@ h1 {
   border: 1px solid #d0d0d0;
   border-radius: 8px;
   background: #fff;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .prompt input:focus {

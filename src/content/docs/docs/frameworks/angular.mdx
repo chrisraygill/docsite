@@ -9,70 +9,22 @@ supportedLanguages:
 ---
 
 import {
-Aside,
-Code,
-FileTree,
-LinkButton,
-Tabs,
-TabItem,
+  Aside,
+  Code,
+  FileTree,
+  LinkButton,
+  Tabs,
+  TabItem,
 } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
-
-export const componentCode = (url) => `import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { streamFlow } from 'genkit/beta/client';
-
-interface RecipeIngredient {
-  name?: string;
-  quantity?: string;
-  onSale?: boolean;
-}
-
-interface Recipe {
-  title?: string;
-  description?: string;
-  servings?: number;
-  ingredients?: RecipeIngredient[];
-  steps?: string[];
-}
-
-@Component({
-  selector: 'app-root',
-  imports: [FormsModule],
-  templateUrl: './app.html',
-  styleUrl: './app.css',
-})
-export class App {
-  craving = signal('something warm with chicken');
-  recipe = signal<Recipe | null>(null);
-  isStreaming = signal(false);
-
-  async generateRecipe() {
-    if (!this.craving().trim()) return;
-    this.recipe.set(null);
-    this.isStreaming.set(true);
-    try {
-      const result = streamFlow({
-        url: '${url}',
-        input: { craving: this.craving() },
-      });
-      for await (const partial of result.stream) {
-        this.recipe.set(partial as Recipe);
-      }
-      await result.output;
-    } catch (err) {
-      console.error('Failed to generate recipe', err);
-    } finally {
-      this.isStreaming.set(false);
-    }
-  }
-}
-`;
+import { componentCode } from './_snippets/angular-app';
+import bargainChefFlowCode from './_snippets/bargainChefFlow.ts?raw';
 
 export const corsCallout = (
   <Aside type="caution" title="Enable CORS on the backend">
-    If your Angular app and Genkit backend run on different origins, configure CORS on the backend or the browser will block the request.
+    If your Angular app and Genkit backend run on different origins, configure
+    CORS on the backend or the browser will block the request.
   </Aside>
 );
 
@@ -193,49 +145,7 @@ export GEMINI_API_KEY=<your API key>
 
 {/* TODO: add a note here pointing readers to alternative model providers (Vertex AI, Anthropic, OpenAI, Ollama). */}
 
-</TabItem>
-
-<TabItem label="Standalone backend">
-
-Create the Angular project:
-
-```bash
-ng new my-genkit-angular
-cd my-genkit-angular
-```
-
-Install the Genkit web client, which lets the browser call your standalone backend:
-
-<PackageManagerTabs command="npm install genkit" />
-
-</TabItem>
-
-</Tabs>
-
-</Lang>
-
-<Lang lang="go dart python">
-
-Create the Angular project:
-
-```bash
-ng new my-genkit-angular
-cd my-genkit-angular
-```
-
-Install the Genkit web client, which lets the browser call your standalone backend:
-
-<PackageManagerTabs command="npm install genkit" />
-
-</Lang>
-
-<Lang lang="js">
-
-## Create the backend
-
-<Tabs syncKey="angular-setup">
-
-<TabItem label="Angular SSR">
+### Create the backend flow
 
 The backend handles requests from the Angular app. For each request, it prompts Gemini to draft a recipe, lets the model call a tool to look up today's grocery sale prices, and streams the partial recipe back to the browser as it's generated.
 
@@ -243,101 +153,11 @@ The whole pipeline is a single Genkit flow. A flow is a special Genkit function 
 
 Create `src/genkit/bargainChefFlow.ts`:
 
-```ts title="src/genkit/bargainChefFlow.ts"
-import { googleAI } from '@genkit-ai/google-genai';
-import { retry } from '@genkit-ai/middleware';
-import { genkit, z } from 'genkit';
-
-const ai = genkit({
-  plugins: [googleAI()],
-});
-
-const getIngredientsOnSale = ai.defineTool(
-  {
-    name: 'getIngredientsOnSale',
-    description:
-      'Returns the ingredients on sale at the local grocery store, with prices. The sale set differs between weekdays and weekends.',
-    inputSchema: z.object({
-      dayType: z
-        .enum(['weekday', 'weekend'])
-        .describe('Whether to fetch weekday or weekend sale prices.'),
-    }),
-    outputSchema: z.array(
-      z.object({
-        name: z.string(),
-        price: z.string(),
-      }),
-    ),
-  },
-  async ({ dayType }) => {
-    // Mock data: in a real app, query a pricing database.
-    return dayType === 'weekend'
-      ? [
-          { name: 'chicken breast', price: '$2.99/lb' },
-          { name: 'pasta', price: '$0.79' },
-          { name: 'canned tomatoes', price: '$0.99' },
-          { name: 'garlic', price: '$0.50 / head' },
-          { name: 'olive oil', price: '$6.99' },
-        ]
-      : [
-          { name: 'eggs', price: '$3.49 / dozen' },
-          { name: 'spinach', price: '$1.99' },
-          { name: 'parmesan', price: '$4.99' },
-          { name: 'lemons', price: '$0.50 each' },
-          { name: 'rice', price: '$2.49' },
-          { name: 'butter', price: '$3.99' },
-        ];
-  },
-);
-
-const RecipeSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  servings: z.number(),
-  ingredients: z.array(
-    z.object({
-      name: z.string(),
-      quantity: z.string(),
-      onSale: z.boolean(),
-    }),
-  ),
-  steps: z.array(z.string()),
-});
-
-export const bargainChefFlow = ai.defineFlow(
-  {
-    name: 'bargainChefFlow',
-    inputSchema: z.object({
-      craving: z
-        .string()
-        .describe('What the user feels like eating right now.'),
-    }),
-    outputSchema: RecipeSchema,
-    streamSchema: RecipeSchema.partial(),
-  },
-  async ({ craving }, { sendChunk }) => {
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-
-    const { stream, response } = ai.generateStream({
-      model: googleAI.model('gemini-flash-latest', { temperature: 0.7 }),
-      prompt: `Today is ${today}. The user is craving: ${craving}.
-
-Call the getIngredientsOnSale tool with the dayType that matches today. Saturday and Sunday are weekends; all other days are weekdays. Then propose ONE recipe that takes advantage of those deals. For each ingredient, set onSale=true if it appears in the tool's response, false otherwise.`,
-      tools: [getIngredientsOnSale],
-      output: { schema: RecipeSchema },
-      use: [retry({ maxRetries: 3 })],
-    });
-
-    for await (const chunk of stream) {
-      if (chunk.output) sendChunk(chunk.output);
-    }
-
-    const { output } = await response;
-    if (!output) throw new Error('Failed to generate recipe');
-    return output;
-  },
-);
-```
+<Code
+  code={bargainChefFlowCode}
+  lang="ts"
+  meta='title="src/genkit/bargainChefFlow.ts"'
+/>
 
 The file builds the flow in four parts:
 
@@ -390,11 +210,35 @@ Verify that your project layout matches the structure below:
 
 <TabItem label="Standalone backend">
 
-Your Genkit backend already exposes the HTTP endpoint. Continue to [Build the Angular UI](#build-the-angular-ui) to wire up the browser.
+Create the Angular project:
+
+```bash
+ng new my-genkit-angular
+cd my-genkit-angular
+```
+
+Install the Genkit web client, which lets the browser call your standalone backend:
+
+<PackageManagerTabs command="npm install genkit" />
 
 </TabItem>
 
 </Tabs>
+
+</Lang>
+
+<Lang lang="go dart python">
+
+Create the Angular project:
+
+```bash
+ng new my-genkit-angular
+cd my-genkit-angular
+```
+
+Install the Genkit web client, which lets the browser call your standalone backend:
+
+<PackageManagerTabs command="npm install genkit" />
 
 </Lang>
 
@@ -412,7 +256,11 @@ Now update the Angular app so the browser can call your Genkit backend and rende
 
 Replace the contents of `src/app/app.ts` with the following:
 
-<Code code={componentCode('/api/bargainChefFlow')} lang="ts" meta='title="src/app/app.ts"' />
+<Code
+  code={componentCode('/api/bargainChefFlow')}
+  lang="ts"
+  meta='title="src/app/app.ts"'
+/>
 
 </TabItem>
 
@@ -420,7 +268,11 @@ Replace the contents of `src/app/app.ts` with the following:
 
 Replace the contents of `src/app/app.ts` with the following. The URL points to your standalone backend; `8080` is the default port for the Express integration, so adjust it if your backend uses a different port.
 
-<Code code={componentCode('http://localhost:8080/bargainChefFlow')} lang="ts" meta='title="src/app/app.ts"' />
+<Code
+  code={componentCode('http://localhost:8080/bargainChefFlow')}
+  lang="ts"
+  meta='title="src/app/app.ts"'
+/>
 
 {corsCallout}
 
@@ -434,7 +286,11 @@ Replace the contents of `src/app/app.ts` with the following. The URL points to y
 
 Replace the contents of `src/app/app.ts` with the following. The URL points to your standalone backend; adjust the port if your backend doesn't run on `8080`.
 
-<Code code={componentCode('http://localhost:8080/bargainChefFlow')} lang="ts" meta='title="src/app/app.ts"' />
+<Code
+  code={componentCode('http://localhost:8080/bargainChefFlow')}
+  lang="ts"
+  meta='title="src/app/app.ts"'
+/>
 
 {corsCallout}
 
@@ -449,7 +305,10 @@ Replace the contents of `src/app/app.html` with the following:
 ```angular title="src/app/app.html"
 <main>
   <h1>Bargain Chef</h1>
-  <p class="tagline">Tell me what you feel like eating and I'll suggest a recipe built around today's grocery deals.</p>
+  <p class="tagline">
+    Tell me what you feel like eating and I'll suggest a recipe built around
+    today's grocery deals.
+  </p>
 
   <form class="prompt" (submit)="$event.preventDefault(); generateRecipe()">
     <input
@@ -467,9 +326,15 @@ Replace the contents of `src/app/app.html` with the following:
 
   @if (recipe(); as r) {
     <article>
-      @if (r.title) { <h2>{{ r.title }}</h2> }
-      @if (r.description) { <p class="description">{{ r.description }}</p> }
-      @if (r.servings) { <p class="serves"><strong>Serves:</strong> {{ r.servings }}</p> }
+      @if (r.title) {
+        <h2>{{ r.title }}</h2>
+      }
+      @if (r.description) {
+        <p class="description">{{ r.description }}</p>
+      }
+      @if (r.servings) {
+        <p class="serves"><strong>Serves:</strong> {{ r.servings }}</p>
+      }
 
       @if (r.ingredients?.length) {
         <h3>Ingredients</h3>
@@ -477,7 +342,9 @@ Replace the contents of `src/app/app.html` with the following:
           @for (ing of r.ingredients; track $index) {
             <li>
               {{ ing.quantity }} {{ ing.name }}
-              @if (ing.onSale) { <span class="badge">on sale</span> }
+              @if (ing.onSale) {
+                <span class="badge">on sale</span>
+              }
             </li>
           }
         </ul>
@@ -546,7 +413,9 @@ h1 {
   border: 1px solid #d0d0d0;
   border-radius: 8px;
   background: #fff;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .prompt input:focus {

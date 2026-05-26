@@ -37,14 +37,15 @@ touch src/index.ts
 
 <PackageManagerTabs
   command={`
-npm install express genkit @genkit-ai/google-genai @genkit-ai/express @genkit-ai/middleware
-npm install -D typescript tsx @types/node @types/express genkit-cli
+npm install express cors genkit @genkit-ai/google-genai @genkit-ai/express @genkit-ai/middleware
+npm install -D typescript tsx @types/node @types/express @types/cors genkit-cli
 `}
 />
 
 These packages include:
 
 - **`express`**: The Express web framework.
+- **`cors`**: Express CORS middleware. Lets browser frontends served from a different origin (such as a Vite or Next.js dev server) call the Genkit endpoint.
 - **`genkit`**: Core Genkit SDK.
 - **`@genkit-ai/google-genai`**: Plugin that connects Genkit to Google's Gemini models.
 - **`@genkit-ai/express`**: Provides Express server integration for Genkit flows.
@@ -189,11 +190,13 @@ Wire up the Genkit flow as an Express route. Create `src/index.ts`:
 
 ```ts title="src/index.ts"
 import express from 'express';
+import cors from 'cors';
 import { expressHandler } from '@genkit-ai/express';
 import { bargainChefFlow } from './bargainChefFlow';
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.post('/bargainChefFlow', expressHandler(bargainChefFlow));
 
@@ -202,7 +205,7 @@ app.listen(8080, () => {
 });
 ```
 
-`expressHandler` adapts your Genkit flow to an Express request handler. It parses the JSON request body, invokes the flow, and (when the client opts in with an `Accept: text/event-stream` header) streams chunks back as server-sent events.
+`expressHandler` adapts your Genkit flow to an Express request handler. It parses the JSON request body, invokes the flow, and (when the client opts in with an `Accept: text/event-stream` header) streams chunks back as server-sent events. `app.use(cors())` lets browser frontends running on a different origin (a Vite dev server, a separately-deployed Next.js app, etc.) call the endpoint.
 
 ### Check the project layout
 

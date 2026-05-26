@@ -35,13 +35,14 @@ uv run python manage.py startapp recipes
 ### Install packages
 
 ```bash
-uv add django django-ninja uvicorn genkit genkit-plugin-google-genai
+uv add django django-ninja django-cors-headers uvicorn genkit genkit-plugin-google-genai
 ```
 
 These packages include:
 
 - **`django`**: The Django web framework.
 - **`django-ninja`**: Async-first API framework built on Django with Pydantic validation.
+- **`django-cors-headers`**: CORS middleware. Lets browser frontends served from a different origin call the Genkit endpoint.
 - **`uvicorn`**: ASGI server that runs Django with async support.
 - **`genkit`**: Core Genkit SDK.
 - **`genkit-plugin-google-genai`**: Plugin that connects Genkit to Google's Gemini models.
@@ -81,12 +82,17 @@ Update `myproject/settings.py` so Django loads the `recipes` app and runs withou
 INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.auth',
+    'corsheaders',
     'recipes',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
+
+# Lets browser frontends served from a different origin call the endpoint.
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'myproject.urls'
 

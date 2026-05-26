@@ -69,6 +69,7 @@ from datetime import datetime
 from typing import Literal
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from genkit import ActionRunContext, Genkit
@@ -165,6 +166,14 @@ async def bargain_chef_flow(input: CravingInput, ctx: ActionRunContext) -> Recip
 
 
 app = FastAPI()
+
+# Lets browser frontends served from a different origin call the endpoint.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 
 @app.post('/bargainChefFlow', response_model=None)

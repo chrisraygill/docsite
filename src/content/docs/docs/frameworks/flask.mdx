@@ -39,7 +39,7 @@ curl -sL cli.genkit.dev | bash
 Then install the packages you need in your project:
 
 ```bash
-pip install flask genkit genkit-plugin-google-genai genkit-plugin-flask
+pip install flask flask-cors genkit genkit-plugin-google-genai genkit-plugin-flask
 ```
 
 These packages include:
@@ -70,6 +70,7 @@ from datetime import datetime
 from typing import Literal
 
 from flask import Flask
+from flask_cors import CORS
 from pydantic import BaseModel, Field
 
 from genkit import ActionRunContext, Genkit
@@ -82,6 +83,8 @@ ai = Genkit(
 )
 
 app = Flask(__name__)
+# Lets browser frontends served from a different origin call the endpoint.
+CORS(app)
 
 
 class SaleIngredient(BaseModel):

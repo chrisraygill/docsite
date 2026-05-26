@@ -39,7 +39,7 @@ curl -sL cli.genkit.dev | bash
 Add the Genkit packages your app needs:
 
 ```bash
-dart pub add genkit genkit_google_genai genkit_shelf schemantic shelf shelf_router dev:build_runner
+dart pub add genkit genkit_google_genai genkit_shelf schemantic shelf shelf_cors_headers shelf_router dev:build_runner
 ```
 
 These packages include:
@@ -49,6 +49,7 @@ These packages include:
 - **`genkit_shelf`**: Exposes Genkit flows as Shelf handlers.
 - **`schemantic`**: Generates JSON schemas from Dart classes for typed flow inputs and outputs.
 - **`shelf`** and **`shelf_router`**: Shelf server and routing.
+- **`shelf_cors_headers`**: CORS middleware. Lets browser frontends served from a different origin call the Genkit endpoint.
 - **`build_runner`**: Generates the schema code from your annotated classes.
 
 ### Configure a model API key
@@ -89,6 +90,7 @@ import 'package:genkit_shelf/genkit_shelf.dart';
 import 'package:schemantic/schemantic.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
+import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 part 'my_genkit_shelf.g.dart';
@@ -205,6 +207,7 @@ void main() async {
 
   final handler = const Pipeline()
       .addMiddleware(logRequests())
+      .addMiddleware(corsHeaders())
       .addHandler(router.call);
   final server = await io.serve(handler, InternetAddress.anyIPv4, 8080);
   print('Server running on http://localhost:${server.port}');
