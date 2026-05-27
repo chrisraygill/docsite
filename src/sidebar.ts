@@ -154,6 +154,7 @@ const DOCS_SIDEBAR = [
       { label: "Gin", slug: "docs/frameworks/gin" },
       { label: "Hono", slug: "docs/frameworks/hono" },
       { label: "NestJS", slug: "docs/frameworks/nestjs" },
+      { label: "net/http", slug: "docs/frameworks/nethttp" },
       { label: "Shelf", slug: "docs/frameworks/shelf" },
     ],
   },

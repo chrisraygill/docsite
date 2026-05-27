@@ -11,14 +11,12 @@ supportedLanguages:
 import {
   Aside,
   Code,
-  FileTree,
   LinkButton,
   Tabs,
   TabItem,
 } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
-import { componentCode } from './_snippets/angular-app';
 import bargainChefFlowCode from './_snippets/bargainChefFlow.ts?raw';
 
 export const corsCallout = (
@@ -31,11 +29,11 @@ export const corsCallout = (
   </Aside>
 );
 
-In this quickstart, you'll build an Angular app where Gemini streams a recipe into your UI field-by-field while calling a tool mid-generation to look up live grocery prices. You'll learn two of the common AI patterns that Genkit greatly simplifies: streaming structured output and tool calling.
+In this quickstart, , you’ll build **Bargain Chef**, an Angular app where Gemini streams a recipe into your UI field-by-field while calling a tool mid-generation to look up mock grocery sale prices. You'll learn two common AI patterns that Genkit greatly simplifies: streaming structured output and tool calling.
 
 ## What you'll build
 
-**Bargain Chef** suggests recipes built around today's grocery deals. The user types what they're craving, Gemini drafts a recipe, and the model calls a tool to fetch sale prices so it can prefer on-sale ingredients. The recipe streams into the UI field-by-field: title first, then description, then ingredients, then steps, so users see progress immediately instead of waiting for the full recipe..
+**Bargain Chef** suggests recipes built around simulated grocery deals. The user types what they're craving, Gemini drafts a recipe, and the model calls a tool to fetch sale prices so it can prefer on-sale ingredients. The recipe streams into the UI field-by-field: title first, then description, then ingredients, then steps, so users see progress immediately instead of waiting for the full recipe.
 
 {/* TODO: Add video of Bargain Chef app. */}
 
@@ -48,7 +46,7 @@ You can find the [finished code on GitHub](https://github.com/genkit-ai/samples/
 Angular can integrate Genkit in two ways. Choose **Angular SSR** unless you already have a Genkit backend running.
 
 - **Angular SSR (default):** Your Genkit backend lives in the same project as your Angular code. You get shared TypeScript types across the wire, no CORS to configure, and a single deployment. 
-- **Standalone backend and frontend:** Your backend and frontend are separate projects that can be deployed and scaled independently, and reused across multiple clients. Choose this path only if you've already followed a [backend quickstart](/docs/js/frameworks/overview/) and want to put an Angular UI on top of the `bargainChefFlow` you built.
+- **Standalone backend and frontend:** Your backend and frontend are separate projects that can be deployed and scaled independently, and reused across multiple clients. Choose this path only if you've already followed a [backend quickstart](/docs/frameworks/overview/) and want to put an Angular UI on top of the `bargainChefFlow` you built.
 
 The standalone path starts after the backend quickstart. You won't rebuild the flow here; you'll create an Angular UI that calls your existing `bargainChefFlow`.
 
@@ -74,7 +72,7 @@ The standalone path starts after the backend quickstart. You won't rebuild the f
 - Angular CLI
 - Familiarity with Angular and TypeScript
 
-**You should have already completed the [Express](/docs/js/frameworks/express/), [Hono](/docs/js/frameworks/hono/), or other [backend quickstart](/docs/js/frameworks/overview/).** This guide picks up where those leave off and adds an Angular UI to the `bargainChefFlow` you already built there. Make sure your backend is running and note the port it serves on, since you'll need it later.
+**You should have already completed the [Express](/docs/js/frameworks/express/), [Hono](/docs/js/frameworks/hono/), or other [backend quickstart](/docs/frameworks/overview/).** This guide picks up where those leave off and adds an Angular UI to the `bargainChefFlow` you already built there. Make sure your backend is running and note the port it serves on, since you'll need it later.
 
 </TabItem>
 
@@ -174,7 +172,7 @@ The core AI logic is encapsulated in a **flow**, which is a Genkit-managed funct
 You'll build the backend in four parts:
 
 1. **Initialize Genkit** and register Gemini as the model provider.
-2. **Define a tool** the model can call to fetch sale prices. Tools are functions you expose to the model so it can call your code. Common use-cases are to write or fetch data.
+2. **Define a tool** the model can call to fetch sale prices. Tools are functions you expose to the model so it can call your code. Common use cases are to write or fetch data.
 3. **Describe the recipe shape** with Zod. Genkit validates the model's output against this schema, and a partial version of it allows in-progress chunks during streaming.
 4. **Define the flow** that ties it together, streaming chunks to the browser as the model produces them.
 
@@ -223,7 +221,7 @@ If you're coding with an AI assistant, install the [Genkit Agent Skills](https:/
 npx skills add genkit-ai/skills
 ```
 
-See [Develop with AI](/docs/js/develop-with-ai/) for tool-specific installation instructions.
+See [Develop with AI](/docs/develop-with-ai/) for tool-specific installation instructions.
 
 </TabItem>
 
@@ -235,6 +233,8 @@ Create the Angular project:
 ng new my-genkit-angular
 cd my-genkit-angular
 ```
+
+This path assumes your backend is already built and can serve `bargainChefFlow`. In this guide, you'll only build the Angular frontend.
 
 Install the Genkit web client, which lets the Angular app call your standalone backend:
 
@@ -258,6 +258,8 @@ Your backend should already expose `bargainChefFlow`. For reference, here's the 
 
 If your backend exposes a flow with a different name or shape, adjust the URL and the `Recipe` interface in the next section accordingly.
 
+At this point, your Angular app is ready to call the backend flow you already created.
+
 </TabItem>
 
 </Tabs>
@@ -272,6 +274,8 @@ Create the Angular project:
 ng new my-genkit-angular
 cd my-genkit-angular
 ```
+
+Your backend should already be built and able to serve `bargainChefFlow`. In this guide, you'll only build the Angular frontend.
 
 Install the Genkit web client, which lets the browser call your standalone backend:
 
@@ -295,11 +299,13 @@ Your backend should already expose `bargainChefFlow`. For reference, here's the 
 
 If your backend exposes a flow with a different name or shape, adjust the URL and the `Recipe` interface in the next section accordingly.
 
+At this point, your Angular app is ready to call the backend flow you already created.
+
 </Lang>
 
 ## Build the Angular UI
 
-The Angular side calls the flow with `streamFlow` from `genkit/beta/client`, then stores each partial recipe in a signal so the template re-renders as fields arrive. The only thing that changes between integration paths is the URL the client points at.
+The Angular side calls the flow with `streamFlow` from `genkit/beta/client`, then stores each partial recipe in a signal so the template re-renders as fields arrive. Your integration path only changes the flow URL and, for Angular SSR, whether the component can import shared TypeScript types.
 
 ### Update the component class
 
@@ -309,7 +315,7 @@ The Angular side calls the flow with `streamFlow` from `genkit/beta/client`, the
 
 <TabItem label="Angular SSR">
 
-Replace the contents of `src/app/app.ts` with the following. The component pulls its `BargainChefInput` and `PartialRecipe` types from the flow file with `import type`, so the two sides cannot drift apart, and nothing from the server file ends up in the Angular bundle:
+Replace the contents of `src/app/app.ts` with the following. The component imports the flow's TypeScript types with `import type`, so the UI and backend stay in sync without adding server code to the browser bundle:
 
 ```ts title="src/app/app.ts"
 import { Component, signal } from '@angular/core';
@@ -366,7 +372,7 @@ export class App {
 
 <TabItem label="Standalone backend">
 
-Replace the contents of `src/app/app.ts` with the following. The `FLOW_URL` points to your backend, and `8080` is the default port for the Express integration, so adjust it if your backend uses a different port.
+Replace the contents of `src/app/app.ts` with the following. The `FLOW_URL` points to your backend, and `8080` is the default port used by the JavaScript backend quickstarts, so adjust it if your backend uses a different port or route.
 
 ```ts title="src/app/app.ts"
 import { Component, signal } from '@angular/core';
@@ -437,7 +443,7 @@ export class App {
 
 <Lang lang="go dart python">
 
-Replace the contents of `src/app/app.ts` with the following. The `FLOW_URL` points to your standalone backend, so adjust the port if your backend doesn't run on `8080`.
+Replace the contents of `src/app/app.ts` with the following. The `FLOW_URL` points to your standalone backend, so adjust the port or route if your backend doesn't run at `http://localhost:8080/bargainChefFlow`.
 
 ```ts title="src/app/app.ts"
 import { Component, signal } from '@angular/core';
@@ -569,7 +575,7 @@ Replace the contents of `src/app/app.html` with the following:
 </main>
 ```
 
-Each recipe section is wrapped in **`@if`** so it only renders once that field arrives in the stream. The result is a UI that fills in progressively (title first, then description, then ingredients, then steps), giving the same responsive feel as popular chatbot app streaming interfaces. Wrapping the input and button in a `<form>` lets the user submit by pressing Enter, and the `(submit)` handler calls `preventDefault()` so the browser doesn't reload the page before kicking off the streaming request.
+Each recipe section is wrapped in **`@if`** so it only renders once that field arrives in the stream. The result is a UI that fills in progressively instead of waiting for the full recipe. Wrapping the input and button in a `<form>` lets the user submit by pressing Enter, and the `(submit)` handler calls `preventDefault()` so the browser doesn't reload the page before starting the streaming request.
 
 ### Add styles
 
@@ -756,11 +762,13 @@ Start your Genkit backend in one terminal by following the run instructions in t
 
 </Lang>
 
-Open `http://localhost:4200`, enter a craving like `something warm with chicken`, and submit. The title should appear within a second or two, and the rest of the recipe will fill in over the next several seconds. Ingredients that the model sourced from the `getIngredientsOnSale` tool will show an "on sale" badge.
+Open `http://localhost:4200`, enter a craving like `something warm with chicken`, and submit. The title should appear first, followed by the description, ingredients, and steps. Ingredients that the model sourced from the `getIngredientsOnSale` tool will show an "on sale" badge.
+
+If the request fails, check the browser console first. For standalone backends, the most common issue is a CORS error or a `FLOW_URL` that doesn't match the backend route.
 
 ## Inspect what just happened
 
-The Genkit Developer UI is a local console for testing flows and inspecting traces. It records every tool call, model invocation, and streamed chunk, so you can see exactly what the model called, what it received back, and how the recipe was assembled.
+The Genkit Developer UI is a local console for testing flows and inspecting traces. It records every tool call, model invocation, and streamed chunk, so you can see what the model called, what it received back, and how the recipe was assembled.
 
 <Lang lang="js">
 
@@ -849,7 +857,7 @@ In the Developer UI:
 
 ## What you built
 
-You now have a working Genkit app that streams structured output from Gemini into a typed Angular UI field by field, calls a tool mid-generation to ground the model's response in live data, validates input and output against typed schemas end-to-end, recovers from transient model errors with retry middleware, and surfaces every step in a local trace UI.
+You now have a working Genkit app that streams structured output from Gemini into an Angular UI field by field, calls a tool mid-generation to ground the model's response in mock sale-price data, validates input and output against schemas, and surfaces every step in a local trace UI.
 
 ## Next steps
 
