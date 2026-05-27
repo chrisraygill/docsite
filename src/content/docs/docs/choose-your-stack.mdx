@@ -8,60 +8,166 @@ supportedLanguages:
   - python
 ---
 
+import { CardGrid } from '@astrojs/starlight/components';
 import Lang from '../../../components/Lang.astro';
+import FrameworkCard from '../../../components/FrameworkCard.astro';
 
-Pick the guide that matches how you're building. Each guide is self-contained — you don't need to complete the general quickstart first.
-
-## Start with your app platform
+Pick the guide that matches how you're building. Each guide is self-contained, you don't need to complete the general quickstart first.
 
 <Lang lang="js">
 
-If you're building a web app or full-stack TypeScript application, start with one of these guides:
+## App frameworks
 
-- [Next.js](/docs/frameworks/nextjs) for full-stack React apps, with paths for App Router, Pages Router, or a standalone Genkit backend.
-- [SvelteKit](/docs/frameworks/sveltekit) for full-stack Svelte apps using SvelteKit API routes and the Genkit fetch handler.
-- [Nuxt](/docs/frameworks/nuxt) for full-stack Vue apps using Nitro server routes and the Genkit fetch handler.
-- [TanStack Start](/docs/frameworks/tanstack-start) for full-stack React apps using TanStack Router with Vinxi API routes.
-- [Astro](/docs/frameworks/astro) for content-driven sites using Astro SSR with API routes and the Genkit fetch handler.
-- [Angular](/docs/frameworks/angular) for Angular SSR and hybrid-rendered applications.
-- [React (Vite)](/docs/frameworks/react) for client-side React apps that connect to a standalone Genkit backend.
-- [Remix](/docs/frameworks/remix) for full-stack React apps using Remix resource routes and the Genkit fetch handler.
-- [Express](/docs/frameworks/express) for existing Node.js backends or custom API servers.
-- [Hono](/docs/frameworks/hono) for Web-standard request and response handling across Node.js and edge-style runtimes.
-- [Fastify](/docs/frameworks/fastify) for Fastify servers that want to expose Genkit flows through the fetch plugin.
-- [NestJS](/docs/frameworks/nestjs) for NestJS applications that want to expose Genkit flows through a controller.
-- [Deploy with Firebase](/docs/deployment/firebase) if you want the most integrated Google-first serverless path.
-- [Deploy to any platform](/docs/deployment/any-platform) if you're building your own Node.js hosting setup.
+Full-stack and frontend frameworks with built-in AI features.
 
-If you're not ready to choose a framework-specific path yet, start with the [Quickstart](/docs/get-started), then continue into [Creating flows](/docs/flows) and [Generating content](/docs/models).
+<CardGrid>
+  <FrameworkCard
+    framework="nextjs"
+    title="Next.js"
+    description="Full-stack React with App Router, Pages Router, or a standalone Genkit backend."
+    href="/docs/frameworks/nextjs"
+  />
+  <FrameworkCard
+    framework="sveltekit"
+    title="SvelteKit"
+    description="Full-stack Svelte using SvelteKit API routes and the Genkit fetch handler."
+    href="/docs/frameworks/sveltekit"
+  />
+  <FrameworkCard
+    framework="nuxt"
+    title="Nuxt"
+    description="Full-stack Vue using Nitro server routes and the Genkit fetch handler."
+    href="/docs/frameworks/nuxt"
+  />
+  <FrameworkCard
+    framework="tanstack-start"
+    title="TanStack Start"
+    description="Full-stack React using TanStack Router with Vinxi API routes."
+    href="/docs/frameworks/tanstack-start"
+  />
+  <FrameworkCard
+    framework="astro"
+    title="Astro"
+    description="Content-driven sites using Astro SSR with API routes."
+    href="/docs/frameworks/astro"
+  />
+  <FrameworkCard
+    framework="angular"
+    title="Angular"
+    description="Angular SSR and hybrid-rendered applications."
+    href="/docs/frameworks/angular"
+  />
+  <FrameworkCard
+    framework="react"
+    title="React (Vite)"
+    description="Client-side React apps that connect to a standalone Genkit backend."
+    href="/docs/frameworks/react"
+  />
+  <FrameworkCard
+    framework="remix"
+    title="Remix"
+    description="Full-stack React using Remix resource routes and the Genkit fetch handler."
+    href="/docs/frameworks/remix"
+  />
+</CardGrid>
+
+## Backend frameworks
+
+Standalone Node.js servers that expose Genkit flows as API endpoints.
+
+<CardGrid>
+  <FrameworkCard
+    framework="express"
+    title="Express"
+    description="Existing Node.js backends or custom API servers."
+    href="/docs/frameworks/express"
+  />
+  <FrameworkCard
+    framework="hono"
+    title="Hono"
+    description="Web-standard request and response handling across Node.js and edge runtimes."
+    href="/docs/frameworks/hono"
+  />
+  <FrameworkCard
+    framework="fastify"
+    title="Fastify"
+    description="Fastify servers exposing Genkit flows through the fetch plugin."
+    href="/docs/frameworks/fastify"
+  />
+  <FrameworkCard
+    framework="nestjs"
+    title="NestJS"
+    description="NestJS applications exposing Genkit flows through a controller."
+    href="/docs/frameworks/nestjs"
+  />
+</CardGrid>
+
+If you're not ready to choose a framework yet, start with the [Quickstart](/docs/get-started), then continue into [Creating flows](/docs/flows) and [Generating content](/docs/models).
 
 </Lang>
 
 <Lang lang="go">
 
-For Go projects, Genkit is a great fit when you want a low-level, model-agnostic SDK behind your own services:
+## Backend frameworks
 
-- [Gin](/docs/frameworks/gin) for Gin-based REST APIs and web services.
-- [Echo](/docs/frameworks/echo) for Echo servers with built-in middleware support.
-- [Chi](/docs/frameworks/chi) for lightweight, composable routers using `net/http`.
-- [net/http](/docs/frameworks/nethttp) for standard-library-only Go services without a third-party router.
-- [Deploy with Cloud Run](/docs/deployment/cloud-run) for the most direct managed deployment path.
-- [Deploy to any platform](/docs/deployment/any-platform) for custom servers and self-managed environments.
+Genkit is a great fit for Go services when you want a low-level, model-agnostic SDK behind your own APIs.
 
-If you're not ready to choose a framework-specific path yet, start with the [Quickstart](/docs/get-started), then continue into [Creating flows](/docs/flows) and [Generating content](/docs/models).
+<CardGrid>
+  <FrameworkCard
+    framework="gin"
+    title="Gin"
+    description="Gin-based REST APIs and web services."
+    href="/docs/frameworks/gin"
+  />
+  <FrameworkCard
+    framework="echo"
+    title="Echo"
+    description="Echo servers with built-in middleware support."
+    href="/docs/frameworks/echo"
+  />
+  <FrameworkCard
+    framework="chi"
+    title="Chi"
+    description="Lightweight, composable routers using net/http."
+    href="/docs/frameworks/chi"
+  />
+  <FrameworkCard
+    framework="nethttp"
+    title="net/http"
+    description="Standard-library-only Go services without a third-party router."
+    href="/docs/frameworks/nethttp"
+  />
+</CardGrid>
 
-If you're building a Go backend for a separate web or mobile frontend, pair this with the [Web client](/docs/frontend/web-client) or [Flutter](/docs/frontend/flutter) guide.
+If you're not ready to choose a framework yet, start with the [Quickstart](/docs/get-started), then continue into [Creating flows](/docs/flows) and [Generating content](/docs/models).
+
+If you're building a Go backend for a separate web or mobile frontend, pair it with the [Web client](/docs/frontend/web-client) or [Flutter](/docs/frontend/flutter) guide.
 
 </Lang>
 
 <Lang lang="dart">
 
-For Dart, Genkit supports both client-heavy and full-stack paths:
+## App frameworks
 
-- [Flutter](/docs/frontend/flutter) for mobile, desktop, and web apps using the Dart client SDK story.
-- [Shelf](/docs/frameworks/shelf) for Dart servers that expose flows and APIs directly.
-- [Deploy with Cloud Run](/docs/deployment/cloud-run) for managed backend hosting.
-- [Deploy to any platform](/docs/deployment/any-platform) for custom Dart deployments.
+<CardGrid>
+  <FrameworkCard
+    framework="flutter"
+    title="Flutter"
+    description="Mobile, desktop, and web apps using the Dart client SDK."
+    href="/docs/frontend/flutter"
+  />
+</CardGrid>
+
+## Backend frameworks
+
+<CardGrid>
+  <FrameworkCard
+    framework="shelf"
+    title="Shelf"
+    description="Dart servers that expose flows and APIs directly."
+    href="/docs/frameworks/shelf"
+  />
+</CardGrid>
 
 If you want to get oriented first, start with the [Quickstart](/docs/get-started) and then explore [Calling Genkit from the client](/docs/client).
 
@@ -69,23 +175,34 @@ If you want to get oriented first, start with the [Quickstart](/docs/get-started
 
 <Lang lang="python">
 
-For Python, start from the web framework or deployment model you already use:
+## Backend frameworks
 
-- [FastAPI](/docs/frameworks/fastapi) for modern APIs, streaming responses, and typed server applications.
-- [Flask](/docs/frameworks/flask) for lightweight Python services and flexible server integrations.
-- [Django](/docs/frameworks/django) for adding Genkit flows to Django projects using Django Ninja or REST framework.
-- [Deploy with Cloud Run](/docs/deployment/cloud-run) for a managed container path.
-- [Deploy to any platform](/docs/deployment/any-platform) for custom Python hosting.
+Start from the web framework you already use, or pick one for a new Genkit service.
+
+<CardGrid>
+  <FrameworkCard
+    framework="fastapi"
+    title="FastAPI"
+    description="Modern APIs, streaming responses, and typed server applications."
+    href="/docs/frameworks/fastapi"
+  />
+  <FrameworkCard
+    framework="flask"
+    title="Flask"
+    description="Lightweight Python services and flexible server integrations."
+    href="/docs/frameworks/flask"
+  />
+  <FrameworkCard
+    framework="django"
+    title="Django"
+    description="Add Genkit flows to Django projects using Django Ninja or REST framework."
+    href="/docs/frameworks/django"
+  />
+</CardGrid>
 
 If your Python service is powering a separate web or mobile app, also review the [Web client](/docs/frontend/web-client) or [Flutter](/docs/frontend/flutter) guide.
 
 </Lang>
-
-## Choose by application shape
-
-- **App with built-in AI features:** Start with an app integration guide like [Next.js](/docs/frameworks/nextjs), [SvelteKit](/docs/frameworks/sveltekit), [Nuxt](/docs/frameworks/nuxt), [TanStack Start](/docs/frameworks/tanstack-start), [Astro](/docs/frameworks/astro), [Angular](/docs/frameworks/angular), [React (Vite)](/docs/frameworks/react), [Remix](/docs/frameworks/remix), or [Flutter](/docs/frontend/flutter). Each guide offers two paths — use the framework's own API routes, or connect to a standalone Genkit backend in any language.
-- **Standalone server for AI endpoints:** Start with a server integration guide like [Express](/docs/frameworks/express), [Hono](/docs/frameworks/hono), [NestJS](/docs/frameworks/nestjs), [Gin](/docs/frameworks/gin), or [FastAPI](/docs/frameworks/fastapi), then connect a frontend with the [Web client](/docs/frontend/web-client) or [Flutter](/docs/frontend/flutter) guide.
-- **Prototype first, architecture later:** Start with the [Quickstart](/docs/get-started), test your flows in the [Developer tools](/docs/devtools), and then move into a framework guide once the feature takes shape.
 
 ## After you choose a stack
 
