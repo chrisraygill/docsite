@@ -11,7 +11,6 @@ supportedLanguages:
 import { CardGrid } from '@astrojs/starlight/components';
 import Lang from '../../../components/Lang.astro';
 import FrameworkCard from '../../../components/FrameworkCard.astro';
-import AppFrameworksGrid from '../../../components/AppFrameworksGrid.astro';
 
 Pick the guide that matches how you're building. Each guide is self-contained, you don't need to complete the general quickstart first.
 
@@ -50,7 +49,62 @@ Pick the guide that matches how you're building. Each guide is self-contained, y
 
 Full-stack and frontend frameworks with built-in AI features. Each guide covers using the framework's own API routes or connecting to a standalone Genkit backend.
 
-<AppFrameworksGrid lang="js" />
+<CardGrid>
+  <FrameworkCard
+    framework="nextjs"
+    title="Next.js"
+    description="Full-stack React with App Router, Pages Router, or a standalone Genkit backend."
+    href="/docs/js/frameworks/nextjs/"
+  />
+  <FrameworkCard
+    framework="sveltekit"
+    title="SvelteKit"
+    description="Full-stack Svelte using SvelteKit API routes and the Genkit fetch handler."
+    href="/docs/js/frameworks/sveltekit/"
+  />
+  <FrameworkCard
+    framework="nuxt"
+    title="Nuxt"
+    description="Full-stack Vue using Nitro server routes and the Genkit fetch handler."
+    href="/docs/js/frameworks/nuxt/"
+  />
+  <FrameworkCard
+    framework="tanstack-start"
+    title="TanStack Start"
+    description="Full-stack React using TanStack Router with Vinxi API routes."
+    href="/docs/js/frameworks/tanstack-start/"
+  />
+  <FrameworkCard
+    framework="astro"
+    title="Astro"
+    description="Content-driven sites using Astro SSR with API routes."
+    href="/docs/js/frameworks/astro/"
+  />
+  <FrameworkCard
+    framework="angular"
+    title="Angular"
+    description="Angular SSR and hybrid-rendered applications."
+    href="/docs/js/frameworks/angular/"
+  />
+  <FrameworkCard
+    framework="react"
+    title="React (Vite)"
+    description="Client-side React apps that connect to a standalone Genkit backend."
+    href="/docs/js/frameworks/react/"
+  />
+  <FrameworkCard
+    framework="remix"
+    title="Remix"
+    description="Full-stack React using Remix resource routes and the Genkit fetch handler."
+    href="/docs/js/frameworks/remix/"
+  />
+  <FrameworkCard
+    framework="flutter"
+    title="Flutter"
+    description="Mobile, desktop, and web apps using the Dart client SDK."
+    href="/docs/frontend/flutter/"
+  />
+</CardGrid>
 
 ## Backend frameworks
 
@@ -122,7 +176,62 @@ If you're not ready to choose a framework yet, start with the [Quickstart](/docs
 
 Pair a Go Genkit backend with any of these frontends. Each guide shows how to call your flows over HTTP.
 
-<AppFrameworksGrid lang="go" />
+<CardGrid>
+  <FrameworkCard
+    framework="nextjs"
+    title="Next.js"
+    description="React frontend that calls your Genkit flows over HTTP."
+    href="/docs/go/frameworks/nextjs/"
+  />
+  <FrameworkCard
+    framework="sveltekit"
+    title="SvelteKit"
+    description="Svelte frontend that calls your Genkit flows over HTTP."
+    href="/docs/go/frameworks/sveltekit/"
+  />
+  <FrameworkCard
+    framework="nuxt"
+    title="Nuxt"
+    description="Vue frontend that calls your Genkit flows over HTTP."
+    href="/docs/go/frameworks/nuxt/"
+  />
+  <FrameworkCard
+    framework="tanstack-start"
+    title="TanStack Start"
+    description="TanStack Start frontend that calls your Genkit flows over HTTP."
+    href="/docs/go/frameworks/tanstack-start/"
+  />
+  <FrameworkCard
+    framework="astro"
+    title="Astro"
+    description="Astro frontend that calls your Genkit flows over HTTP."
+    href="/docs/go/frameworks/astro/"
+  />
+  <FrameworkCard
+    framework="angular"
+    title="Angular"
+    description="Angular frontend that calls your Genkit flows over HTTP."
+    href="/docs/go/frameworks/angular/"
+  />
+  <FrameworkCard
+    framework="react"
+    title="React (Vite)"
+    description="React (Vite) frontend that calls your Genkit flows over HTTP."
+    href="/docs/go/frameworks/react/"
+  />
+  <FrameworkCard
+    framework="remix"
+    title="Remix"
+    description="Remix frontend that calls your Genkit flows over HTTP."
+    href="/docs/go/frameworks/remix/"
+  />
+  <FrameworkCard
+    framework="flutter"
+    title="Flutter"
+    description="Mobile, desktop, and web apps that call your Genkit flows over HTTP."
+    href="/docs/frontend/flutter/"
+  />
+</CardGrid>
 
 If you're not ready to choose a framework yet, start with the [Quickstart](/docs/get-started), then continue into [Creating flows](/docs/flows) and [Generating content](/docs/models).
 
@@ -145,7 +254,62 @@ If you're not ready to choose a framework yet, start with the [Quickstart](/docs
 
 Pair a Dart Genkit backend with any of these frontends. Each guide shows how to call your flows over HTTP.
 
-<AppFrameworksGrid lang="dart" />
+<CardGrid>
+  <FrameworkCard
+    framework="nextjs"
+    title="Next.js"
+    description="React frontend that calls your Genkit flows over HTTP."
+    href="/docs/dart/frameworks/nextjs/"
+  />
+  <FrameworkCard
+    framework="sveltekit"
+    title="SvelteKit"
+    description="Svelte frontend that calls your Genkit flows over HTTP."
+    href="/docs/dart/frameworks/sveltekit/"
+  />
+  <FrameworkCard
+    framework="nuxt"
+    title="Nuxt"
+    description="Vue frontend that calls your Genkit flows over HTTP."
+    href="/docs/dart/frameworks/nuxt/"
+  />
+  <FrameworkCard
+    framework="tanstack-start"
+    title="TanStack Start"
+    description="TanStack Start frontend that calls your Genkit flows over HTTP."
+    href="/docs/dart/frameworks/tanstack-start/"
+  />
+  <FrameworkCard
+    framework="astro"
+    title="Astro"
+    description="Astro frontend that calls your Genkit flows over HTTP."
+    href="/docs/dart/frameworks/astro/"
+  />
+  <FrameworkCard
+    framework="angular"
+    title="Angular"
+    description="Angular frontend that calls your Genkit flows over HTTP."
+    href="/docs/dart/frameworks/angular/"
+  />
+  <FrameworkCard
+    framework="react"
+    title="React (Vite)"
+    description="React (Vite) frontend that calls your Genkit flows over HTTP."
+    href="/docs/dart/frameworks/react/"
+  />
+  <FrameworkCard
+    framework="remix"
+    title="Remix"
+    description="Remix frontend that calls your Genkit flows over HTTP."
+    href="/docs/dart/frameworks/remix/"
+  />
+  <FrameworkCard
+    framework="flutter"
+    title="Flutter"
+    description="Mobile, desktop, and web apps that call your Genkit flows over HTTP."
+    href="/docs/frontend/flutter/"
+  />
+</CardGrid>
 
 If you want to get oriented first, start with the [Quickstart](/docs/get-started) and then explore [Calling Genkit from the client](/docs/client).
 
@@ -182,7 +346,62 @@ Start from the web framework you already use, or pick one for a new Genkit servi
 
 Pair a Python Genkit backend with any of these frontends. Each guide shows how to call your flows over HTTP.
 
-<AppFrameworksGrid lang="python" />
+<CardGrid>
+  <FrameworkCard
+    framework="nextjs"
+    title="Next.js"
+    description="React frontend that calls your Genkit flows over HTTP."
+    href="/docs/python/frameworks/nextjs/"
+  />
+  <FrameworkCard
+    framework="sveltekit"
+    title="SvelteKit"
+    description="Svelte frontend that calls your Genkit flows over HTTP."
+    href="/docs/python/frameworks/sveltekit/"
+  />
+  <FrameworkCard
+    framework="nuxt"
+    title="Nuxt"
+    description="Vue frontend that calls your Genkit flows over HTTP."
+    href="/docs/python/frameworks/nuxt/"
+  />
+  <FrameworkCard
+    framework="tanstack-start"
+    title="TanStack Start"
+    description="TanStack Start frontend that calls your Genkit flows over HTTP."
+    href="/docs/python/frameworks/tanstack-start/"
+  />
+  <FrameworkCard
+    framework="astro"
+    title="Astro"
+    description="Astro frontend that calls your Genkit flows over HTTP."
+    href="/docs/python/frameworks/astro/"
+  />
+  <FrameworkCard
+    framework="angular"
+    title="Angular"
+    description="Angular frontend that calls your Genkit flows over HTTP."
+    href="/docs/python/frameworks/angular/"
+  />
+  <FrameworkCard
+    framework="react"
+    title="React (Vite)"
+    description="React (Vite) frontend that calls your Genkit flows over HTTP."
+    href="/docs/python/frameworks/react/"
+  />
+  <FrameworkCard
+    framework="remix"
+    title="Remix"
+    description="Remix frontend that calls your Genkit flows over HTTP."
+    href="/docs/python/frameworks/remix/"
+  />
+  <FrameworkCard
+    framework="flutter"
+    title="Flutter"
+    description="Mobile, desktop, and web apps that call your Genkit flows over HTTP."
+    href="/docs/frontend/flutter/"
+  />
+</CardGrid>
 
 </Lang>
 
