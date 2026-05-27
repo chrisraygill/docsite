@@ -139,6 +139,26 @@ function splitFrontmatter(source: string): { frontmatter: Record<string, unknown
   };
 }
 
+function resolveDescriptionForLanguage(
+  description: unknown,
+  language: Language,
+): string | undefined {
+  if (typeof description === 'string') {
+    return description;
+  }
+  if (description && typeof description === 'object' && !Array.isArray(description)) {
+    const map = description as Record<string, unknown>;
+    const candidate = map[language];
+    if (typeof candidate === 'string') {
+      return candidate;
+    }
+    if (typeof map.default === 'string') {
+      return map.default;
+    }
+  }
+  return undefined;
+}
+
 function getSupportedLanguages(frontmatter: Record<string, unknown>): Language[] {
   const declared = Array.isArray(frontmatter.supportedLanguages)
     ? frontmatter.supportedLanguages.filter((value): value is string => typeof value === 'string')
@@ -501,9 +521,12 @@ async function generateForSourceFile(filePath: string, context: GenerateContext)
   const extension = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   for (const language of supportedLanguages) {
     const outputPath = path.join(OUTPUT_ROOT, language, `${slug}.${extension}`);
+    const resolvedDescription = resolveDescriptionForLanguage(frontmatter.description, language);
+    const { description: _omitDescription, ...frontmatterWithoutDescription } = frontmatter;
     const languageFrontmatter = rewriteRelativeAssetPaths(
       {
-        ...frontmatter,
+        ...frontmatterWithoutDescription,
+        ...(resolvedDescription !== undefined ? { description: resolvedDescription } : {}),
         supportedLanguages: [language],
       },
       filePath,
