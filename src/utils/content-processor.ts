@@ -174,8 +174,9 @@ function stripLeadingEsm(content: string): string {
     }
     i++;
 
-    // Statement ends when depth is balanced AND the line terminates with ; or a from-clause.
-    if (depth <= 0 && /(?:;|from\s+['"][^'"]+['"]\??(?:raw)?['"]?\s*;?)\s*$/.test(line)) {
+    // Statement ends when depth is balanced AND the line terminates with ; or a from-clause
+    // (optionally followed by a trailing // or /* */ comment).
+    if (depth <= 0 && /(?:;|from\s+['"][^'"]+['"]\??(?:raw)?['"]?\s*;?)\s*(?:\/\/[^\n]*|\/\*[\s\S]*?\*\/)?\s*$/.test(line)) {
       inEsm = false;
       depth = 0;
     }

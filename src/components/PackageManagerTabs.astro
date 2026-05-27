@@ -13,10 +13,13 @@ function convertLine(line: string, target: 'npm' | 'pnpm' | 'yarn' | 'bun'): str
   if (!trimmed) return '';
 
   // 1. Parse NPM install commands
-  const installRegex = /^npm\s+(install|i)\s+(.*?)$/;
+  const installRegex = /^npm\s+(install|i)(?:\s+(.*?))?$/;
   const installMatch = trimmed.match(installRegex);
   if (installMatch) {
-    const args = installMatch[2];
+    const args = installMatch[2] ?? '';
+    if (!args.trim()) {
+      return `${target} install`;
+    }
     const flagTokens = new Set(['-D', '--save-dev', '-g', '--global']);
     const tokens = args.split(/\s+/).filter(Boolean);
     const isDev = tokens.includes('-D') || tokens.includes('--save-dev');
