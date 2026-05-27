@@ -8,47 +8,109 @@ supportedLanguages:
   - python
 ---
 
+import { CardGrid } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
+import FrameworkCard from '../../../../components/FrameworkCard.astro';
 
-Pick the server framework that matches your backend. Each guide is self-contained and shows how to expose a Genkit flow as an HTTP endpoint that any client — web, mobile, or another service — can call.
+Pick the server framework that matches your backend. Each guide is self-contained and shows how to expose a Genkit flow as an HTTP endpoint that any client, web, mobile, or another service, can call.
 
 <Lang lang="js">
 
-## TypeScript / JavaScript
-
-- [Express](/docs/frameworks/express) — the most common Node.js backend framework. Good default if you don't have a preference.
-- [Hono](/docs/frameworks/hono) — Web-standard request/response handling that works across Node.js and edge-style runtimes.
-- [Fastify](/docs/frameworks/fastify) — high-performance Node.js server using the Genkit fetch plugin.
-- [NestJS](/docs/frameworks/nestjs) — progressive Node.js framework using a controller with the Genkit fetch handler.
+<CardGrid>
+  <FrameworkCard
+    framework="express"
+    title="Express"
+    description="Existing Node.js backends or custom API servers."
+    href="/docs/js/backend-frameworks/express/"
+  />
+  <FrameworkCard
+    framework="hono"
+    title="Hono"
+    description="Web-standard request and response handling across Node.js and edge runtimes."
+    href="/docs/js/backend-frameworks/hono/"
+  />
+  <FrameworkCard
+    framework="fastify"
+    title="Fastify"
+    description="Fastify servers exposing Genkit flows through the fetch plugin."
+    href="/docs/js/backend-frameworks/fastify/"
+  />
+  <FrameworkCard
+    framework="nestjs"
+    title="NestJS"
+    description="NestJS applications exposing Genkit flows through a controller."
+    href="/docs/js/backend-frameworks/nestjs/"
+  />
+</CardGrid>
 
 </Lang>
 
 <Lang lang="go">
 
-## Go
-
-- [Gin](/docs/frameworks/gin) — the most popular Go web framework, with rich middleware support.
-- [Echo](/docs/frameworks/echo) — high-performance Go framework with built-in middleware.
-- [Chi](/docs/frameworks/chi) — lightweight, composable router built on `net/http`.
-- [net/http](/docs/frameworks/nethttp) — standard library only, no third-party router.
+<CardGrid>
+  <FrameworkCard
+    framework="gin"
+    title="Gin"
+    description="Gin-based REST APIs and web services."
+    href="/docs/go/backend-frameworks/gin/"
+  />
+  <FrameworkCard
+    framework="echo"
+    title="Echo"
+    description="Echo servers with built-in middleware support."
+    href="/docs/go/backend-frameworks/echo/"
+  />
+  <FrameworkCard
+    framework="chi"
+    title="Chi"
+    description="Lightweight, composable routers using net/http."
+    href="/docs/go/backend-frameworks/chi/"
+  />
+  <FrameworkCard
+    framework="nethttp"
+    title="net/http"
+    description="Standard-library-only Go services without a third-party router."
+    href="/docs/go/backend-frameworks/nethttp/"
+  />
+</CardGrid>
 
 </Lang>
 
 <Lang lang="dart">
 
-## Dart
-
-- [Shelf](/docs/frameworks/shelf) — the standard Dart HTTP server framework.
+<CardGrid>
+  <FrameworkCard
+    framework="shelf"
+    title="Shelf"
+    description="Dart servers that expose flows and APIs directly."
+    href="/docs/dart/backend-frameworks/shelf/"
+  />
+</CardGrid>
 
 </Lang>
 
 <Lang lang="python">
 
-## Python
-
-- [FastAPI](/docs/frameworks/fastapi) — modern async APIs with automatic OpenAPI docs and typed request validation.
-- [Flask](/docs/frameworks/flask) — lightweight and flexible; good for adding Genkit to an existing Flask service.
-- [Django](/docs/frameworks/django) — for adding Genkit flows to Django projects using Django Ninja or REST framework.
+<CardGrid>
+  <FrameworkCard
+    framework="fastapi"
+    title="FastAPI"
+    description="Modern APIs, streaming responses, and typed server applications."
+    href="/docs/python/backend-frameworks/fastapi/"
+  />
+  <FrameworkCard
+    framework="flask"
+    title="Flask"
+    description="Lightweight Python services and flexible server integrations."
+    href="/docs/python/backend-frameworks/flask/"
+  />
+  <FrameworkCard
+    framework="django"
+    title="Django"
+    description="Add Genkit flows to Django projects using Django Ninja or REST framework."
+    href="/docs/python/backend-frameworks/django/"
+  />
+</CardGrid>
 
 </Lang>
 
@@ -56,6 +118,6 @@ Pick the server framework that matches your backend. Each guide is self-containe
 
 Once your backend exposes flows as HTTP endpoints, connect a frontend:
 
-- [Web client](/docs/frontend/web-client) — call flows from any JavaScript/TypeScript web app
+- [Web client](/docs/web-client) — call flows from any JavaScript/TypeScript web app
 - [Flutter](/docs/frontend/flutter) — call flows from a Flutter mobile, desktop, or web app
-- Or use any of the [app integration guides](/docs/frameworks/app-overview), full-stack frameworks like Next.js, SvelteKit, Nuxt, and others can also consume a standalone Genkit backend
+- Or use any of the [app integration guides](/docs/app-frameworks/overview), full-stack frameworks like Next.js, SvelteKit, Nuxt, and others can also consume a standalone Genkit backend
