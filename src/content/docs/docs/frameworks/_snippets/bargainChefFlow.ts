@@ -44,6 +44,10 @@ const getIngredientsOnSale = ai.defineTool(
   },
 );
 
+const BargainChefInputSchema = z.object({
+  craving: z.string().describe('What the user feels like eating right now.'),
+});
+
 const RecipeSchema = z.object({
   title: z.string(),
   description: z.string(),
@@ -58,14 +62,15 @@ const RecipeSchema = z.object({
   steps: z.array(z.string()),
 });
 
+// Exported for the Angular component to import as types.
+export type BargainChefInput = z.infer<typeof BargainChefInputSchema>;
+export type Recipe = z.infer<typeof RecipeSchema>;
+export type PartialRecipe = Partial<Recipe>;
+
 export const bargainChefFlow = ai.defineFlow(
   {
     name: 'bargainChefFlow',
-    inputSchema: z.object({
-      craving: z
-        .string()
-        .describe('What the user feels like eating right now.'),
-    }),
+    inputSchema: BargainChefInputSchema,
     outputSchema: RecipeSchema,
     streamSchema: RecipeSchema.partial(),
   },

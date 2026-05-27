@@ -389,6 +389,17 @@ function rewriteRelativeAssetPaths(
   return value;
 }
 
+// Splits content on fenced code blocks, applies `transform` only to non-code
+// segments. Prevents asset-path rewrites from clobbering literal `from '...'`
+// strings that appear inside ```ts code samples.
+function applyOutsideCodeBlocks(content: string, transform: (chunk: string) => string): string {
+  const fenceRegex = /(^[ \t]*```[^\n]*\n[\s\S]*?^[ \t]*```[ \t]*$)/gm;
+  return content
+    .split(fenceRegex)
+    .map((chunk, i) => (i % 2 === 0 ? transform(chunk) : chunk))
+    .join('');
+}
+
 function rewriteBodyAssetPaths(body: string, sourceFilePath: string, outputFilePath: string): string {
   const rewriteRelativePath = (relativeRef: string): string => {
     if (!relativeRef.startsWith('./') && !relativeRef.startsWith('../')) {
@@ -404,24 +415,26 @@ function rewriteBodyAssetPaths(body: string, sourceFilePath: string, outputFileP
     return `${rel}${suffix}`;
   };
 
-  let rewritten = body;
+  return applyOutsideCodeBlocks(body, (chunk) => {
+    let rewritten = chunk;
 
-  rewritten = rewritten.replace(
-    /(from\s+['"])(\.\.?\/[^'"]+)(['"])/g,
-    (_full, prefix, rel, suffix) => `${prefix}${rewriteRelativePath(rel)}${suffix}`,
-  );
+    rewritten = rewritten.replace(
+      /(from\s+['"])(\.\.?\/[^'"]+)(['"])/g,
+      (_full, prefix, rel, suffix) => `${prefix}${rewriteRelativePath(rel)}${suffix}`,
+    );
 
-  rewritten = rewritten.replace(
-    /(\]\()(\.\.?\/[^)\s]+)(\))/g,
-    (_full, prefix, rel, suffix) => `${prefix}${rewriteRelativePath(rel)}${suffix}`,
-  );
+    rewritten = rewritten.replace(
+      /(\]\()(\.\.?\/[^)\s]+)(\))/g,
+      (_full, prefix, rel, suffix) => `${prefix}${rewriteRelativePath(rel)}${suffix}`,
+    );
 
-  rewritten = rewritten.replace(
-    /((?:src|href)=['"])(\.\.?\/[^'"]+)(['"])/g,
-    (_full, prefix, rel, suffix) => `${prefix}${rewriteRelativePath(rel)}${suffix}`,
-  );
+    rewritten = rewritten.replace(
+      /((?:src|href)=['"])(\.\.?\/[^'"]+)(['"])/g,
+      (_full, prefix, rel, suffix) => `${prefix}${rewriteRelativePath(rel)}${suffix}`,
+    );
 
-  return rewritten;
+    return rewritten;
+  });
 }
 
 function buildGeneratedFileNotice(sourceFilePath: string, extension: 'md' | 'mdx'): string {
