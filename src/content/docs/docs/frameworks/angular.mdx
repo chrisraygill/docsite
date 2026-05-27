@@ -8,7 +8,7 @@ supportedLanguages:
   - python
 ---
 
-import { Aside, Code, LinkButton } from '@astrojs/starlight/components';
+import { Aside, Code, FileTree, LinkButton } from '@astrojs/starlight/components';
 import Lang from '../../../../components/Lang.astro';
 import PackageManagerTabs from '../../../../components/PackageManagerTabs.astro';
 import bargainChefFlowCode from './_snippets/bargainChefFlow.ts?raw';
@@ -225,6 +225,27 @@ app.use((req, res, next) => angularApp.handle(req));
 ```
 
 At this point, your Angular app has a Genkit flow served at `/api/bargainChefFlow`.
+
+### Check the project layout
+
+Verify that your project layout matches the structure below:
+
+<FileTree>
+
+- package.json
+- ... other Angular config files
+- src
+  - app
+    - app.css
+    - app.html
+    - app.ts
+    - ... other component files
+  - genkit
+    - bargainChefFlow.ts
+  - server.ts
+  - ... other Angular source files
+
+</FileTree>
 
 ### Optional: install the Genkit agent skills
 
