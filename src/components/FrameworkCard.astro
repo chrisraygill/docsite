@@ -11,6 +11,10 @@ const { framework, title, description, href } = Astro.props;
 type IconDef = { file: string; color?: string; multiColor?: boolean };
 
 const ICONS: Record<string, IconDef> = {
+  typescript: { file: 'typescript', color: '#3178c6' },
+  go: { file: 'go', color: '#00add8' },
+  dart: { file: 'dart', color: '#0175c2' },
+  python: { file: 'python', color: '#3776ab' },
   nextjs: { file: 'nextdotjs', color: '#ffffff' },
   sveltekit: { file: 'svelte', color: '#ff3e00' },
   nuxt: { file: 'nuxt', color: '#00dc82' },

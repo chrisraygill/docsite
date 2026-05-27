@@ -11,65 +11,46 @@ supportedLanguages:
 import { CardGrid } from '@astrojs/starlight/components';
 import Lang from '../../../components/Lang.astro';
 import FrameworkCard from '../../../components/FrameworkCard.astro';
+import AppFrameworksGrid from '../../../components/AppFrameworksGrid.astro';
 
 Pick the guide that matches how you're building. Each guide is self-contained, you don't need to complete the general quickstart first.
+
+## Choose your Genkit SDK
+
+<CardGrid>
+  <FrameworkCard
+    framework="typescript"
+    title="TypeScript"
+    description="Genkit for Node.js and JavaScript runtimes."
+    href="/docs/js/choose-your-stack/"
+  />
+  <FrameworkCard
+    framework="go"
+    title="Go"
+    description="Genkit for Go services and APIs."
+    href="/docs/go/choose-your-stack/"
+  />
+  <FrameworkCard
+    framework="dart"
+    title="Dart"
+    description="Genkit for Flutter and Dart servers."
+    href="/docs/dart/choose-your-stack/"
+  />
+  <FrameworkCard
+    framework="python"
+    title="Python"
+    description="Genkit for Python web services."
+    href="/docs/python/choose-your-stack/"
+  />
+</CardGrid>
 
 <Lang lang="js">
 
 ## App frameworks
 
-Full-stack and frontend frameworks with built-in AI features.
+Full-stack and frontend frameworks with built-in AI features. Each guide covers using the framework's own API routes or connecting to a standalone Genkit backend.
 
-<CardGrid>
-  <FrameworkCard
-    framework="nextjs"
-    title="Next.js"
-    description="Full-stack React with App Router, Pages Router, or a standalone Genkit backend."
-    href="/docs/frameworks/nextjs"
-  />
-  <FrameworkCard
-    framework="sveltekit"
-    title="SvelteKit"
-    description="Full-stack Svelte using SvelteKit API routes and the Genkit fetch handler."
-    href="/docs/frameworks/sveltekit"
-  />
-  <FrameworkCard
-    framework="nuxt"
-    title="Nuxt"
-    description="Full-stack Vue using Nitro server routes and the Genkit fetch handler."
-    href="/docs/frameworks/nuxt"
-  />
-  <FrameworkCard
-    framework="tanstack-start"
-    title="TanStack Start"
-    description="Full-stack React using TanStack Router with Vinxi API routes."
-    href="/docs/frameworks/tanstack-start"
-  />
-  <FrameworkCard
-    framework="astro"
-    title="Astro"
-    description="Content-driven sites using Astro SSR with API routes."
-    href="/docs/frameworks/astro"
-  />
-  <FrameworkCard
-    framework="angular"
-    title="Angular"
-    description="Angular SSR and hybrid-rendered applications."
-    href="/docs/frameworks/angular"
-  />
-  <FrameworkCard
-    framework="react"
-    title="React (Vite)"
-    description="Client-side React apps that connect to a standalone Genkit backend."
-    href="/docs/frameworks/react"
-  />
-  <FrameworkCard
-    framework="remix"
-    title="Remix"
-    description="Full-stack React using Remix resource routes and the Genkit fetch handler."
-    href="/docs/frameworks/remix"
-  />
-</CardGrid>
+<AppFrameworksGrid lang="js" />
 
 ## Backend frameworks
 
@@ -110,8 +91,6 @@ If you're not ready to choose a framework yet, start with the [Quickstart](/docs
 
 ## Backend frameworks
 
-Genkit is a great fit for Go services when you want a low-level, model-agnostic SDK behind your own APIs.
-
 <CardGrid>
   <FrameworkCard
     framework="gin"
@@ -139,24 +118,17 @@ Genkit is a great fit for Go services when you want a low-level, model-agnostic 
   />
 </CardGrid>
 
-If you're not ready to choose a framework yet, start with the [Quickstart](/docs/get-started), then continue into [Creating flows](/docs/flows) and [Generating content](/docs/models).
+## App frameworks
 
-If you're building a Go backend for a separate web or mobile frontend, pair it with the [Web client](/docs/frontend/web-client) or [Flutter](/docs/frontend/flutter) guide.
+Pair a Go Genkit backend with any of these frontends. Each guide shows how to call your flows over HTTP.
+
+<AppFrameworksGrid lang="go" />
+
+If you're not ready to choose a framework yet, start with the [Quickstart](/docs/get-started), then continue into [Creating flows](/docs/flows) and [Generating content](/docs/models).
 
 </Lang>
 
 <Lang lang="dart">
-
-## App frameworks
-
-<CardGrid>
-  <FrameworkCard
-    framework="flutter"
-    title="Flutter"
-    description="Mobile, desktop, and web apps using the Dart client SDK."
-    href="/docs/frontend/flutter"
-  />
-</CardGrid>
 
 ## Backend frameworks
 
@@ -168,6 +140,12 @@ If you're building a Go backend for a separate web or mobile frontend, pair it w
     href="/docs/frameworks/shelf"
   />
 </CardGrid>
+
+## App frameworks
+
+Pair a Dart Genkit backend with any of these frontends. Each guide shows how to call your flows over HTTP.
+
+<AppFrameworksGrid lang="dart" />
 
 If you want to get oriented first, start with the [Quickstart](/docs/get-started) and then explore [Calling Genkit from the client](/docs/client).
 
@@ -200,7 +178,11 @@ Start from the web framework you already use, or pick one for a new Genkit servi
   />
 </CardGrid>
 
-If your Python service is powering a separate web or mobile app, also review the [Web client](/docs/frontend/web-client) or [Flutter](/docs/frontend/flutter) guide.
+## App frameworks
+
+Pair a Python Genkit backend with any of these frontends. Each guide shows how to call your flows over HTTP.
+
+<AppFrameworksGrid lang="python" />
 
 </Lang>
 
