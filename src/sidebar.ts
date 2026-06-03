@@ -177,6 +177,7 @@ const DOCS_SIDEBAR = [
   {
     label: "Model providers",
     items: [
+      { label: "Overview", slug: "docs/integrations/model-providers" },
       { label: "Google Generative AI", slug: "docs/integrations/google-genai" },
       { label: "Google Vertex AI", slug: "docs/integrations/vertex-ai" },
       { label: "OpenAI", slug: "docs/integrations/openai" },
