@@ -1,51 +1,189 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Navigation from "../components/landing/Navigation.astro";
-import Hero from "../components/landing/Hero.astro";
-import LanguageSelector from "../components/landing/LanguageSelector.astro";
-import Features from "../components/landing/Features.astro";
-import DeveloperTools from "../components/landing/DeveloperTools.astro";
-import Examples from "../components/landing/Examples.astro";
-import Resources from "../components/landing/Resources.astro";
-import Footer from "../components/landing/Footer.astro";
-import Button from "../components/landing/Button.astro";
-import Icon from "../components/landing/Icon.astro";
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import type { StarlightPageProps } from '@astrojs/starlight/components/StarlightPage.astro';
+
+import Hero from '../components/landing/Hero.astro';
+import LanguageSelector from '../components/landing/LanguageSelector.astro';
+import Features from '../components/landing/Features.astro';
+import DeveloperTools from '../components/landing/DeveloperTools.astro';
+import Resources from '../components/landing/Resources.astro';
+import Button from '../components/landing/Button.astro';
+import Icon from '../components/landing/Icon.astro';
+
+// Render the landing page inside the full Starlight frame (shared header,
+// footer, and theming) using the `splash` template, which drops the sidebar
+// and table of contents for a full-width layout.
+//
+// We intentionally do NOT use Starlight's `hero` frontmatter: instead of the
+// image-based hero, we render the original landing page's text-forward hero
+// ("Build Powerful Agentic Apps") as the first piece of page content below.
+// Without a `hero`, Starlight would render the page title as an <h1>; we hide
+// that panel via CSS (`.content-panel:first-of-type`) since the hero provides
+// its own headline.
+const frontmatter: StarlightPageProps['frontmatter'] = {
+  title: 'Genkit',
+  description:
+    "Open-source framework for building AI-powered apps with unified APIs for Google Gemini, GPT, Claude, and more. Built-in developer tools, structured outputs, tool calling, and production monitoring. Deploy anywhere.",
+  template: 'splash',
+  tableOfContents: false,
+};
 ---
 
-<Layout>
-  <Navigation />  
-  <Hero />
-  <LanguageSelector />
-  <Features />
-  <DeveloperTools />
-  <Examples />
-  <Resources />
-  <section class="py-12 sm:py-20 px-6 text-center">
-    <div class="max-w-4xl mx-auto">
-      <div class="flex items-center justify-center mx-auto mb-8">
-        <Icon name="genkit-logo" size="lg" />
+<StarlightPage frontmatter={frontmatter}>
+  <div class="not-content landing-root">
+    <Hero />
+    <LanguageSelector />
+    <Features />
+    <DeveloperTools />
+    <Resources />
+
+    <section class="cta-section py-12 sm:py-20 px-6 text-center">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex items-center justify-center mx-auto mb-8">
+          <Icon name="genkit-logo" size="lg" class="brand-logo" />
+        </div>
+        <h2 class="cta-title mb-6">Get Started Today</h2>
+        <Button variant="primary" href="/docs/get-started">Get Started</Button>
       </div>
-      <h2 class="page-title mb-6">Get Started Today</h2>
-      <h3 class="card-title text-muted mb-8"></h3>
-      <Button variant="primary" href="/docs/get-started">
-        Get Started
-      </Button>
-    </div>
-  </section>
-  <Footer />
-</Layout>
+    </section>
+  </div>
+</StarlightPage>
 
-<style>
-.page-title {
-  font-size: 2.5rem; /* 40px */
-  font-weight: 700;
-  line-height: 1.25;
-  color: var(--text-primary);
-}
-
-@media (min-width: 768px) {
-  .page-title {
-    font-size: 3.5rem; /* 56px */
+<style is:global>
+  /*
+   * Landing-page styles. This file is bundled only with the `/` route, so the
+   * bridge variables and typography utilities below do not leak onto docs pages.
+   *
+   * The landing components were originally dark-only and referenced custom
+   * tokens (`--genkit-primary`, `--text-primary`, ...). Here we re-map those
+   * tokens onto Starlight's `--sl-*` color tokens so the components adapt to the
+   * docs light/dark theme toggle, while keeping the Genkit brand accent.
+   */
+  /*
+   * Centering fix. The repo sets `--sl-content-margin-inline: 1rem`
+   * (src/tailwind.css), which Starlight's inner `.sl-container` (ContentPanel)
+   * reads via `margin-inline: var(--sl-content-margin-inline, auto)`. That pins
+   * the content with a 1rem left margin instead of centering it. On docs pages
+   * the sidebar masks this; on this splash page (no sidebar) it biases the whole
+   * page left and caps it at the narrower content width.
+   *
+   * Override both tokens on this route: widen the content column and restore
+   * auto side-margins so `main` and `.sl-container` are truly centered.
+   */
+  main {
+    --sl-content-width: 80rem;
+    --sl-content-margin-inline: auto;
+    margin-inline: auto !important;
   }
-}
+
+  /*
+   * With no `hero` frontmatter, Starlight renders the page title in the first
+   * content panel. Our text hero provides its own headline, so hide that panel.
+   */
+  .content-panel:first-of-type {
+    display: none;
+  }
+
+  .landing-root {
+    /* Brand accent (kept in both themes) */
+    --genkit-primary: #c6d2ff;
+    --genkit-primary-hover: #b8caff;
+
+    /* Text — Starlight tokens flip automatically between themes */
+    --text-primary: var(--sl-color-white);
+    --text-muted: var(--sl-color-gray-3);
+
+    /* Surfaces & borders — Starlight grays flip between themes */
+    --genkit-nav-bg: var(--sl-color-gray-6); /* cards / containers */
+    --genkit-icon-bg: var(--sl-color-gray-5);
+    --surface-primary: var(--sl-color-gray-6); /* secondary button bg */
+    --surface-elevated: var(--sl-color-gray-5); /* hover / elevated */
+    --surface-subtle: var(--sl-color-gray-6); /* faint feature-card bg */
+    --border-secondary: var(--sl-color-gray-5);
+    --border-light: var(--sl-color-gray-5);
+
+    --font-sans: 'Google Sans', Arial, sans-serif;
+  }
+
+  /* === Typography utilities (ported from landing.css, theme-aware) === */
+  .landing-root .text-muted {
+    color: var(--text-muted);
+  }
+
+  .landing-root .subtitle {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+  }
+
+  .landing-root .caption {
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+
+  .landing-root .section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text-primary);
+  }
+
+  @media (min-width: 768px) {
+    .landing-root .section-title {
+      font-size: 2.25rem;
+    }
+  }
+
+  .landing-root .card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .landing-root .card-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  /*
+   * The periwinkle brand accent (`--genkit-primary`) reads well on the dark
+   * theme but is too low-contrast as a *text* color on the light theme. For
+   * link and step-title text, use Starlight's theme-aware accent instead: it
+   * stays a light periwinkle-blue in dark mode and becomes a readable blue in
+   * light mode. (Filled buttons keep the periwinkle background.)
+   */
+  .landing-root a.link-card {
+    color: var(--sl-color-text-accent);
+  }
+
+  .landing-root a.link-card:hover {
+    color: var(--text-primary);
+  }
+
+  .landing-root h3.step-title {
+    color: var(--sl-color-text-accent);
+  }
+
+  /*
+   * The Genkit logo icon has a hardcoded white fill, which disappears on the
+   * light theme's white background. Map it to the theme-aware text color so it
+   * stays white on dark and turns dark on light. The periwinkle accent inside
+   * the mark is kept.
+   */
+  .landing-root .brand-logo :where([fill='white']) {
+    fill: var(--sl-color-white);
+  }
+
+  /* Final call-to-action heading */
+  .landing-root .cta-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text-primary);
+  }
+
+  @media (min-width: 768px) {
+    .landing-root .cta-title {
+      font-size: 3.5rem;
+    }
+  }
 </style>
